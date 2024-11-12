@@ -1,3 +1,48 @@
+﻿<script setup lang="ts">
+import { Dialog } from '@headlessui/vue'
+import {
+  UserPlusIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  TrendingUpIcon,
+  TrendingDownIcon,
+  AlertTriangleIcon,
+  PlusIcon
+} from 'lucide-vue-next'
+
+// Import data
+import {
+  selectedView,
+  showAddResourceModal,
+  newResource,
+  resources,
+  departments,
+  stats,
+} from './data'
+
+// Import methods and computed properties
+import {
+  currentWeekStart,
+  currentWeekEnd,
+  conflicts,
+  weekDays,
+  formatDateRange,
+  formatDayDate,
+  isWeekend,
+  previousWeek,
+  nextWeek,
+  getAssignments,
+  getAssignmentClass,
+  getUtilizationClass,
+  getUtilizationBarClass,
+  handleDragStart,
+  handleDrop,
+  openAssignmentDetails,
+  openAddAssignment,
+  handleAddResource
+} from './script'
+</script>
+
 <template>
   <div class="p-6">
     <!-- Header with Stats -->
@@ -253,320 +298,13 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { format, addDays, startOfWeek, endOfWeek } from 'date-fns'
-import {
-  UserPlusIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
-  AlertTriangleIcon,
-  UsersIcon,
-  ClockIcon,
-  BriefcaseIcon,
-  PlusIcon
-} from 'lucide-vue-next'
-import { Dialog } from '@headlessui/vue'
-
-// Types
-interface Resource {
-  id: number
-  name: string
-  initials: string
-  department: string
-  skills: string[]
+<style scoped>
+.risk-card {
+  transition: all 0.3s ease;
 }
 
-interface Department {
-  id: number
-  name: string
-  utilization: number
-  capacity: number
-  allocated: number
+.risk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
-
-interface Assignment {
-  id: number
-  resourceId: number
-  project: string
-  date: string
-  hours: number
-  type: 'development' | 'design' | 'meeting'
-}
-
-interface Conflict {
-  id: number
-  message: string
-  severity: 'high' | 'medium' | 'low'
-}
-
-// State
-const selectedView = ref('calendar')
-const currentWeekStart = ref(startOfWeek(new Date()))
-const currentWeekEnd = ref(endOfWeek(new Date()))
-const showAddResourceModal = ref(false)
-const newResource = ref({
-  name: '',
-  department: '',
-  skills: ''
-})
-
-// Mock Data
-const resources = ref<Resource[]>([
-  {
-    id: 1,
-    name: 'John Doe',
-    initials: 'JD',
-    department: 'Development',
-    skills: ['React', 'Node.js']
-  },
-  {
-    id: 2,
-    name: 'Jane Smith',
-    initials: 'JS',
-    department: 'Design',
-    skills: ['UI/UX', 'Figma']
-  }
-])
-
-const departments = ref<Department[]>([
-  {
-    id: 1,
-    name: 'Development',
-    utilization: 85,
-    capacity: 160,
-    allocated: 136
-  },
-  {
-    id: 2,
-    name: 'Design',
-    utilization: 70,
-    capacity: 120,
-    allocated: 84
-  }
-])
-
-const assignments = ref<Assignment[]>([
-  {
-    id: 1,
-    resourceId: 1,
-    project: 'Website Redesign',
-    date: '2024-11-11',
-    hours: 6,
-    type: 'development'
-  },
-  {
-    id: 2,
-    resourceId: 1,
-    project: 'Team Meeting',
-    date: '2024-11-11',
-    hours: 2,
-    type: 'meeting'
-  },
-  {
-    id: 3,
-    resourceId: 2,
-    project: 'Mobile App UI',
-    date: '2024-11-11',
-    hours: 4,
-    type: 'design'
-  }
-])
-
-// Stats data
-const stats = [
-  {
-    title: 'Team Capacity',
-    value: '280h',
-    icon: UsersIcon,
-    bgColor: 'bg-blue-100',
-    iconColor: 'text-blue-600',
-    trend: 5
-  },
-  {
-    title: 'Utilization Rate',
-    value: '78%',
-    icon: ClockIcon,
-    bgColor: 'bg-green-100',
-    iconColor: 'text-green-600',
-    trend: -2
-  },
-  {
-    title: 'Active Projects',
-    value: '12',
-    icon: BriefcaseIcon,
-    bgColor: 'bg-purple-100',
-    iconColor: 'text-purple-600',
-      trend: 8
-    },
-    {
-      title: 'Resource Conflicts',
-      value: '3',
-      icon: AlertTriangleIcon,
-      bgColor: 'bg-yellow-100',
-      iconColor: 'text-yellow-600',
-      trend: -15
-    }
-  ]
-  // Computed Properties
-const weekDays = computed(() => {
-  const days = []
-  let currentDay = currentWeekStart.value
-  while (currentDay <= currentWeekEnd.value) {
-    days.push({
-      date: format(currentDay, 'yyyy-MM-dd'),
-      dayName: format(currentDay, 'EEE')
-    })
-    currentDay = addDays(currentDay, 1)
-  }
-  return days
-})
-
-const conflicts = computed(() => {
-  const result: Conflict[] = []
-  resources.value.forEach(resource => {
-    weekDays.value.forEach(day => {
-      const dailyAssignments = getAssignments(resource.id, day.date)
-      const totalHours = dailyAssignments.reduce((sum, a) => sum + a.hours, 0)
-      
-      if (totalHours > 8) {
-        result.push({
-          id: Date.now(),
-          message: `${resource.name} is overallocated on ${formatDayDate(day.date)} (${totalHours}h)`,
-          severity: 'high'
-        })
-      }
-    })
-  })
-  return result
-})
-
-// Methods
-const formatDateRange = (start: Date, end: Date) => {
-  return `${format(start, 'MMM d')} - ${format(end, 'MMM d, yyyy')}`
-}
-
-const formatDayDate = (date: string) => {
-  return format(new Date(date), 'MMM d')
-}
-
-const isWeekend = (date: string) => {
-  const day = new Date(date).getDay()
-  return day === 0 || day === 6
-}
-
-const previousWeek = () => {
-  currentWeekStart.value = addDays(currentWeekStart.value, -7)
-  currentWeekEnd.value = addDays(currentWeekEnd.value, -7)
-}
-
-const nextWeek = () => {
-  currentWeekStart.value = addDays(currentWeekStart.value, 7)
-  currentWeekEnd.value = addDays(currentWeekEnd.value, 7)
-}
-
-const getAssignments = (resourceId: number, date: string) => {
-  return assignments.value.filter(a => 
-    a.resourceId === resourceId && a.date === date
-  )
-}
-
-const getAssignmentClass = (assignment: Assignment) => {
-  const baseClasses = 'shadow-sm border transition-all hover:shadow-md'
-  const typeClasses = {
-    development: 'bg-blue-50 border-blue-200 text-blue-700',
-    design: 'bg-green-50 border-green-200 text-green-700',
-    meeting: 'bg-purple-50 border-purple-200 text-purple-700'
-  }
-  return `${baseClasses} ${typeClasses[assignment.type]}`
-}
-
-const getUtilizationClass = (utilization: number) => {
-  if (utilization > 90) return 'text-red-600'
-  if (utilization > 75) return 'text-yellow-600'
-  return 'text-green-600'
-}
-
-const getUtilizationBarClass = (utilization: number) => {
-  if (utilization > 90) return 'bg-red-600'
-  if (utilization > 75) return 'bg-yellow-600'
-  return 'bg-green-600'
-}
-
-// Drag and Drop Handlers
-const handleDragStart = (event: DragEvent, assignment: Assignment) => {
-  if (event.dataTransfer) {
-    event.dataTransfer.setData('application/json', JSON.stringify(assignment))
-    event.dataTransfer.effectAllowed = 'move'
-  }
-}
-
-const handleDrop = (event: DragEvent, resourceId: number, date: string) => {
-  const data = event.dataTransfer?.getData('application/json')
-  if (data) {
-    const assignment = JSON.parse(data) as Assignment
-    const index = assignments.value.findIndex(a => a.id === assignment.id)
-    if (index !== -1) {
-      assignments.value[index] = {
-        ...assignment,
-        resourceId,
-        date
-      }
-    }
-  }
-}
-
-// Modal Handlers
-const openAssignmentDetails = (assignment: Assignment) => {
-  // Implement assignment details modal
-  console.log('Opening assignment details:', assignment)
-}
-
-const openAddAssignment = (resourceId: number, date: string) => {
-  // Implement add assignment modal
-  console.log('Opening add assignment modal:', { resourceId, date })
-}
-
-const handleAddResource = () => {
-  const resource: Resource = {
-    id: resources.value.length + 1,
-    name: newResource.value.name,
-    initials: newResource.value.name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase(),
-    department: newResource.value.department,
-    skills: newResource.value.skills.split(',').map(s => s.trim())
-  }
-  
-  resources.value.push(resource)
-  showAddResourceModal.value = false
-  newResource.value = {
-    name: '',
-    department: '',
-    skills: ''
-  }
-}
-
-// Watch for changes that affect conflicts
-watch([assignments, resources], () => {
-  // Update department allocations
-  departments.value = departments.value.map(dept => {
-    const deptResources = resources.value.filter(r => r.department === dept.name)
-    const totalAllocated = deptResources.reduce((total, resource) => {
-      return total + assignments.value
-        .filter(a => a.resourceId === resource.id)
-        .reduce((sum, a) => sum + a.hours, 0)
-    }, 0)
-    
-    return {
-      ...dept,
-      allocated: totalAllocated,
-      utilization: Math.round((totalAllocated / dept.capacity) * 100)
-    }
-  })
-})
-</script>
+</style>

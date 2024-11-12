@@ -1,3 +1,33 @@
+﻿<script setup lang="ts">
+import VueApexCharts from 'vue3-apexcharts'
+import { PlusIcon } from 'lucide-vue-next'
+
+// Import data
+import {
+  timeRange,
+  selectedProject,
+  activeProjects,
+  showNewProjectDialog,
+  healthMetrics,
+  projectRisks,
+  projects,
+  timelineChartOptions,
+  timelineChartSeries,
+  resourceChartOptions,
+  resourceChartSeries
+} from './data'
+
+// Import methods
+import {
+  formatNumber,
+  getBudgetStatusColor,
+  getBudgetProgressColor,
+  getRiskClass,
+  getRiskBadgeClass,
+  filteredProjects
+} from './script'
+</script>
+
 <template>
   <div class="p-6 space-y-6">
     <!-- Project Overview Header -->
@@ -108,7 +138,7 @@
         <h2 class="mb-4 text-lg font-semibold">Risk Assessment</h2>
         <div class="grid grid-cols-3 gap-4">
           <div v-for="risk in projectRisks" :key="risk.id"
-               class="p-3 border rounded-lg"
+               class="p-3 border rounded-lg risk-card"
                :class="getRiskClass(risk.level)">
             <div class="flex items-center justify-between mb-2">
               <span class="font-medium">{{ risk.name }}</span>
@@ -137,244 +167,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-import VueApexCharts from 'vue3-apexcharts'
-import { 
-  PlusIcon, 
-  TrendingUpIcon, 
-  TrendingDownIcon,
-  AlertTriangleIcon
-} from 'lucide-vue-next'
-
-// Types
-interface Project {
-  id: number
-  name: string
-  budget: number
-  spent: number
-  budgetStatus: string
-  timeline: [Date, Date]
-  risks: Risk[]
-  resources: Resource[]
-}
-
-interface Risk {
-  id: number
-  name: string
-  level: 'Low' | 'Medium' | 'High'
-  description: string
-  impact: string
-}
-
-interface Resource {
-  id: number
-  name: string
-  allocation: number
-  department: string
-}
-
-// State
-const timeRange = ref('month')
-const selectedProject = ref('all')
-const activeProjects = ref(8)
-const showNewProjectDialog = ref(false)
-
-// Mock Data
-const healthMetrics = [
-  {
-    title: 'On Track Projects',
-    value: '6/8',
-    trend: '+12.5%',
-    progress: 75,
-    trendIcon: TrendingUpIcon,
-    trendColor: 'text-green-600',
-    progressColor: 'bg-green-600'
-  },
-  {
-    title: 'Budget Compliance',
-    value: '85%',
-    trend: '-2.3%',
-    progress: 85,
-    trendIcon: TrendingDownIcon,
-    trendColor: 'text-red-600',
-    progressColor: 'bg-blue-600'
-  },
-  {
-    title: 'Resource Utilization',
-    value: '92%',
-    trend: '+5.2%',
-    progress: 92,
-    trendIcon: TrendingUpIcon,
-    trendColor: 'text-green-600',
-    progressColor: 'bg-purple-600'
-  },
-  {
-    title: 'Risk Level',
-    value: 'Low',
-    trend: 'Stable',
-    progress: 25,
-    trendIcon: TrendingUpIcon,
-    trendColor: 'text-green-600',
-    progressColor: 'bg-yellow-600'
-  }
-]
-
-const projectRisks = [
-  {
-    id: 1,
-    name: 'Technical Debt',
-    level: 'Medium',
-    description: 'Increasing complexity in legacy systems',
-    impact: 'Moderate'
-  },
-  {
-    id: 2,
-    name: 'Resource Shortage',
-    level: 'High',
-    description: 'Critical skill gaps in development team',
-    impact: 'Severe'
-  },
-  {
-    id: 3,
-    name: 'Scope Creep',
-    level: 'Low',
-    description: 'Minor feature additions requested',
-    impact: 'Minor'
-  }
-]
-
-// Chart Options
-const timelineChartOptions = {
-  chart: {
-    type: 'rangeBar',
-    toolbar: { show: false }
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true,
-      barHeight: '80%'
-    }
-  },
-  xaxis: {
-    type: 'datetime'
-  }
-}
-
-const timelineChartSeries = [
-  {
-    data: [
-      {
-        x: 'Project A',
-        y: [new Date('2024-01-01').getTime(), new Date('2024-04-30').getTime()]
-      },
-      {
-        x: 'Project B',
-        y: [new Date('2024-02-01').getTime(), new Date('2024-05-31').getTime()]
-      }
-    ]
-  }
-]
-
-const resourceChartOptions = {
-  chart: {
-    type: 'heatmap',
-    toolbar: { show: false }
-  },
-  dataLabels: { enabled: false },
-  colors: ['#008FFB']
-}
-// Add projects data
-const projects = ref<Project[]>([
-  {
-    id: 1,
-    name: 'Website Redesign',
-    budget: 50000,
-    spent: 35000,
-    budgetStatus: 'On Budget',
-    timeline: [new Date('2024-01-01'), new Date('2024-04-30')],
-    risks: [],
-    resources: []
-  },
-  {
-    id: 2,
-    name: 'Mobile App Development',
-    budget: 120000,
-    spent: 95000,
-    budgetStatus: 'Under Budget',
-    timeline: [new Date('2024-02-01'), new Date('2024-06-30')],
-    risks: [],
-    resources: []
-  },
-  {
-    id: 3,
-    name: 'CRM Integration',
-    budget: 80000,
-    spent: 85000,
-    budgetStatus: 'Over Budget',
-    timeline: [new Date('2024-03-01'), new Date('2024-07-31')],
-    risks: [],
-    resources: []
-  }
-])
-
-const resourceChartSeries = [
-  {
-    name: 'Development',
-    data: [
-      { x: 'Project A', y: 80 },
-      { x: 'Project B', y: 40 },
-      { x: 'Project C', y: 60 }
-    ]
-  },
-  {
-    name: 'Design',
-    data: [
-      { x: 'Project A', y: 20 },
-      { x: 'Project B', y: 70 },
-      { x: 'Project C', y: 30 }
-    ]
-  }
-]
-
-// Methods
-const formatNumber = (num: number) => {
-  return num.toLocaleString('en-US')
-}
-
-const getBudgetStatusColor = (status: string) => ({
-  'Under Budget': 'text-green-600',
-  'On Budget': 'text-blue-600',
-  'Over Budget': 'text-red-600'
-}[status])
-
-const getBudgetProgressColor = (percentage: number) => {
-  if (percentage <= 85) return 'bg-green-600'
-  if (percentage <= 100) return 'bg-yellow-600'
-  return 'bg-red-600'
-}
-
-const getRiskClass = (level: string) => ({
-  'Low': 'border-green-200 bg-green-50',
-  'Medium': 'border-yellow-200 bg-yellow-50',
-  'High': 'border-red-200 bg-red-50'
-}[level])
-
-const getRiskBadgeClass = (level: string) => ({
-  'Low': 'px-2 py-1 text-xs rounded-full bg-green-100 text-green-800',
-  'Medium': 'px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800',
-  'High': 'px-2 py-1 text-xs rounded-full bg-red-100 text-red-800'
-}[level])
-
-// Add computed property for filtered projects
-const filteredProjects = computed(() => {
-  if (selectedProject.value === 'all') {
-    return projects.value
-  }
-  return projects.value.filter(p => p.id === parseInt(selectedProject.value))
-})
-</script>
 
 <style scoped>
 .risk-card {

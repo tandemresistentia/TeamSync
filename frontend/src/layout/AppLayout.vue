@@ -43,11 +43,7 @@
               <SearchIcon class="w-5 h-5" />
             </button>
             <div class="w-px h-8 bg-border"></div>
-            <div class="flex items-center gap-2">
-              <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                <UserIcon class="w-4 h-4 text-primary" />
-              </div>
-            </div>
+            <Login/>
           </div>
         </div>
       </div>
@@ -62,6 +58,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import Login from './Login.vue';
 import { 
   LayoutDashboardIcon, 
   UsersIcon, 

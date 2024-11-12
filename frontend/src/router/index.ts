@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '../layout/AppLayout.vue'
 import DashboardPage from '../pages/Dashboard/DashboardPage.vue'
-import TeamsPage from '../pages/TeamsPage.vue'
-import ProjectsPage from '../pages/ProjectsPage.vue'
+import TeamsPage from '../pages/Teams/TeamsPage.vue'
+import ProjectsPage from '@/pages/Project/ProjectsPage.vue'
 import HomePage from '../pages/Home/HomePage.vue'
-import ResourcesPage from '@/pages/ResourcesPage.vue'
+import ResourcesPage from '../pages/Resources/ResourcesPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
