@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/teamsync
     username: postgres
-    password: 25191298Aa!
+    password: postgres
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
