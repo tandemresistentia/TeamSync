@@ -54,7 +54,7 @@
     </nav>
 
     <!-- Page Content -->
-    <main class="px-4 py-6 pt-20 mx-auto max-w-7xl sm:px-6 lg:px-8">
+    <main class="py-6 pt-20 mx-auto rounded-lg sm:px-6 lg:px-8">
       <router-view />
     </main>
   </div>

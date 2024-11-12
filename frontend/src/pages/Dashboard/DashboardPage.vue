@@ -1,3 +1,43 @@
+﻿<script setup lang="ts">
+import VueApexCharts from 'vue3-apexcharts'
+import {
+  XMarkIcon,
+  PlusIcon,
+  FolderPlusIcon,
+  DocumentIcon,
+} from '@heroicons/vue/24/outline'
+
+// Import all data
+import { 
+  alerts, 
+  teamMembers, 
+  projects, 
+  stats, 
+  chartOptions 
+} from './data'
+
+// Import all methods
+import {
+  getStatusColor,
+  getProgressColor,
+  getAlertClass,
+  getAlertIcon,
+  dismissAlert,
+  teamFilter,
+  openNewTaskModal,
+  openNewProjectModal,
+  generateReport
+} from './script'
+
+// Destructure chart options for easier use in template
+const { 
+  productivityChartOptions, 
+  productivityChartSeries, 
+  resourceChartOptions, 
+  resourceChartSeries 
+} = chartOptions
+</script>
+
 <template>
   <div class="p-6">
     <!-- Notifications Bar -->
@@ -138,201 +178,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-import VueApexCharts from 'vue3-apexcharts'
-import {
-  UsersIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  XMarkIcon,
-  PlusIcon,
-  FolderPlusIcon,
-  DocumentIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  BellIcon
-} from '@heroicons/vue/24/outline'
-
-// Mock Data
-const alerts = ref([
-  { id: 1, type: 'warning', message: '3 team members are approaching capacity' },
-  { id: 2, type: 'info', message: 'New project resources available' },
-  { id: 3, type: 'error', message: 'Server capacity reaching critical levels' }
-])
-
-const teamMembers = ref([
-  { id: 1, name: 'John Doe', status: 'available', availability: 85 },
-  { id: 2, name: 'Jane Smith', status: 'busy', availability: 25 },
-  { id: 3, name: 'Mike Johnson', status: 'available', availability: 60 },
-  { id: 4, name: 'Sarah Williams', status: 'busy', availability: 30 }
-])
-
-const projects = ref([
-  { 
-    id: 1, 
-    name: 'Website Redesign', 
-    status: 'On Track', 
-    progress: 75,
-    dueDate: '2024-12-01'
-  },
-  { 
-    id: 2, 
-    name: 'Mobile App', 
-    status: 'At Risk', 
-    progress: 45,
-    dueDate: '2024-11-15'
-  },
-  { 
-    id: 3, 
-    name: 'Database Migration', 
-    status: 'Delayed', 
-    progress: 30,
-    dueDate: '2024-10-30'
-  }
-])
-
-const stats = [
-  {
-    title: 'Team Availability',
-    value: '85%',
-    icon: UsersIcon,
-    bgColor: 'bg-blue-100',
-    iconColor: 'text-blue-600',
-    trend: '+5% vs last week',
-    trendIcon: ArrowTrendingUpIcon,
-    trendColor: 'text-green-600'
-  },
-  {
-    title: 'Projects On Track',
-    value: '8/10',
-    icon: CheckCircleIcon,
-    bgColor: 'bg-green-100',
-    iconColor: 'text-green-600',
-    trend: '+2 vs last month',
-    trendIcon: ArrowTrendingUpIcon,
-    trendColor: 'text-green-600'
-  },
-  {
-    title: 'Resource Usage',
-    value: '72%',
-    icon: ClockIcon,
-    bgColor: 'bg-purple-100',
-    iconColor: 'text-purple-600',
-    trend: '-3% vs last week',
-    trendIcon: ArrowTrendingDownIcon,
-    trendColor: 'text-red-600'
-  },
-  {
-    title: 'Pending Tasks',
-    value: '24',
-    icon: BellIcon,
-    bgColor: 'bg-yellow-100',
-    iconColor: 'text-yellow-600',
-    trend: '4 urgent',
-    trendIcon: ExclamationTriangleIcon,
-    trendColor: 'text-yellow-600'
-  }
-]
-
-// Chart Options
-const productivityChartOptions = {
-  chart: {
-    type: 'line',
-    toolbar: { show: false }
-  },
-  stroke: { curve: 'smooth', width: 3 },
-  colors: ['#3B82F6', '#10B981'],
-  grid: { borderColor: '#f3f4f6' },
-  xaxis: {
-    categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
-  },
-  yaxis: [
-    {
-      title: { text: 'Tasks' }
-    },
-    {
-      opposite: true,
-      title: { text: 'Hours' }
-    }
-  ]
-}
-
-const productivityChartSeries = [
-  {
-    name: 'Tasks Completed',
-    data: [30, 40, 35, 50, 45]
-  },
-  {
-    name: 'Hours Worked',
-    data: [45, 52, 49, 56, 50]
-  }
-]
-
-const resourceChartOptions = {
-  chart: {
-    type: 'bar',
-    toolbar: { show: false }
-  },
-  plotOptions: {
-    bar: { horizontal: true, borderRadius: 4 }
-  },
-  colors: ['#3B82F6'],
-  grid: { borderColor: '#f3f4f6' },
-  xaxis: {
-    categories: ['Server', 'Storage', 'Bandwidth', 'CPU', 'Memory']
-  }
-}
-
-const resourceChartSeries = [{
-  name: 'Usage',
-  data: [85, 72, 65, 89, 76]
-}]
-
-// State
-const teamFilter = ref('all')
-
-// Methods
-const getStatusColor = (status: string) => ({
-  'On Track': 'text-green-600',
-  'At Risk': 'text-yellow-600',
-  'Delayed': 'text-red-600'
-}[status] || 'text-gray-600')
-
-const getProgressColor = (progress: number) => {
-  if (progress >= 75) return 'bg-green-600'
-  if (progress >= 50) return 'bg-blue-600'
-  if (progress >= 25) return 'bg-yellow-600'
-  return 'bg-red-600'
-}
-
-const getAlertClass = (type: string) => ({
-  'warning': 'bg-yellow-50 border-l-4 border-yellow-400',
-  'error': 'bg-red-50 border-l-4 border-red-400',
-  'info': 'bg-blue-50 border-l-4 border-blue-400'
-}[type])
-
-const getAlertIcon = (type: string) => ({
-  'warning': ExclamationTriangleIcon,
-  'error': XMarkIcon,
-  'info': BellIcon
-}[type])
-
-const dismissAlert = (id: number) => {
-  alerts.value = alerts.value.filter(alert => alert.id !== id)
-}
-
-const openNewTaskModal = () => {
-  console.log('Opening new task modal...')
-}
-
-const openNewProjectModal = () => {
-  console.log('Opening new project modal...')
-}
-
-const generateReport = () => {
-  console.log('Generating report...')
-}
-</script>

@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '../layout/AppLayout.vue'
-import DashboardPage from '../pages/DashboardPage.vue'
+import DashboardPage from '../pages/Dashboard/DashboardPage.vue'
 import TeamsPage from '../pages/TeamsPage.vue'
 import ProjectsPage from '../pages/ProjectsPage.vue'
-import HomePage from '../pages/HomePage.vue'
+import HomePage from '../pages/Home/HomePage.vue'
 import ResourcesPage from '@/pages/ResourcesPage.vue'
 
 const router = createRouter({
