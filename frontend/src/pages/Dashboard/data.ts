@@ -139,3 +139,73 @@ export const chartOptions = {
     data: [85, 72, 65, 89, 76]
   }]
 }
+export const criticalTasks = ref([
+  {
+    id: 1,
+    name: 'Database Performance Optimization',
+    priority: 'high',
+    dueDate: 'Today',
+    assignee: 'John Doe',
+    department: 'Development'
+  },
+  {
+    id: 2,
+    name: 'Security Audit Implementation',
+    priority: 'high',
+    dueDate: 'Tomorrow',
+    assignee: 'Sarah Williams',
+    department: 'Security'
+  },
+  {
+    id: 3,
+    name: 'Client Meeting Preparation',
+    priority: 'medium',
+    dueDate: 'Nov 15',
+    assignee: 'Mike Johnson',
+    department: 'Marketing'
+  },
+  {
+    id: 4,
+    name: 'API Documentation Update',
+    priority: 'medium',
+    dueDate: 'Nov 16',
+    assignee: 'Jane Smith',
+    department: 'Development'
+  }
+])
+
+// Projects Needing Attention
+export const projectAlerts = ref([
+  {
+    id: 1,
+    name: 'Mobile App',
+    issue: 'Resource Shortage',
+    description: 'Development team at capacity, may affect sprint delivery',
+    status: 'At Risk',
+    impact: 'high'
+  },
+  {
+    id: 2,
+    name: 'Database Migration',
+    issue: 'Timeline Risk',
+    description: 'Current progress 30% behind schedule, needs immediate attention',
+    status: 'Delayed',
+    impact: 'high'
+  },
+  {
+    id: 3,
+    name: 'CRM Integration',
+    issue: 'Budget Warning',
+    description: 'Project expenses approaching budget limit (85% utilized)',
+    status: 'At Risk',
+    impact: 'medium'
+  },
+  {
+    id: 4,
+    name: 'Cloud Infrastructure',
+    issue: 'Technical Debt',
+    description: 'Critical updates pending, affecting system performance',
+    status: 'Warning',
+    impact: 'medium'
+  }
+])

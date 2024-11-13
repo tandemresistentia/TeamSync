@@ -45,3 +45,12 @@ export interface Resource {
     message: string
     severity: 'high' | 'medium' | 'low'
   }
+  export interface Conflict {
+    id: number
+    type: 'overallocation' | 'scheduling' | 'timeoff' | 'dependency'
+    message: string
+    severity: 'high' | 'medium' | 'low'
+    resources: string[]
+    date: string
+    projects?: string[]
+  }

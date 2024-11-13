@@ -15,9 +15,7 @@ import {
   teamMembers,
   upcomingLeave,
   skillsChartOptions,
-  skillsChartSeries,
-  capacityChartOptions,
-  capacityChartSeries
+  skillsChartSeries
 } from './data'
 
 // Import methods and computed properties
@@ -50,7 +48,7 @@ import {
     </div>
 
     <!-- Team Overview Cards -->
-    <div class="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-3">
       <div v-for="metric in teamMetrics" :key="metric.title" 
            class="p-4 bg-white rounded-lg shadow-sm">
         <div class="flex items-center">
@@ -67,9 +65,9 @@ import {
     </div>
 
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
       <!-- Team Members List -->
-      <div class="lg:col-span-2">
+      <div class="lg:col-span-3">
         <div class="bg-white rounded-lg shadow-sm">
           <div class="p-4 border-b">
             <div class="flex items-center justify-between">
@@ -133,7 +131,7 @@ import {
         </div>
       </div>
 
-      <!-- Skills Matrix & Leave Calendar -->
+      <!-- Right Sidebar -->
       <div class="space-y-6">
         <!-- Skills Distribution -->
         <div class="p-4 bg-white rounded-lg shadow-sm">
@@ -146,9 +144,9 @@ import {
           />
         </div>
 
-        <!-- Team Calendar -->
+        <!-- Leave Calendar -->
         <div class="p-4 bg-white rounded-lg shadow-sm">
-          <h2 class="mb-4 text-lg font-semibold">Leave Calendar</h2>
+          <h2 class="mb-4 text-lg font-semibold">Upcoming Leave</h2>
           <div class="space-y-2">
             <div v-for="leave in upcomingLeave" 
                  :key="leave.id" 
@@ -160,17 +158,6 @@ import {
               <span class="text-gray-600">{{ leave.dates }}</span>
             </div>
           </div>
-        </div>
-
-        <!-- Capacity Planning -->
-        <div class="p-4 bg-white rounded-lg shadow-sm">
-          <h2 class="mb-4 text-lg font-semibold">Team Capacity</h2>
-          <VueApexCharts
-            type="bar"
-            height="200"
-            :options="capacityChartOptions"
-            :series="capacityChartSeries"
-          />
         </div>
       </div>
     </div>

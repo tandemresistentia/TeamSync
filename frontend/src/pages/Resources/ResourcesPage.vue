@@ -1,11 +1,8 @@
 ﻿<script setup lang="ts">
 import { Dialog } from '@headlessui/vue'
 import {
-  UserPlusIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
   AlertTriangleIcon,
   PlusIcon
 } from 'lucide-vue-next'
@@ -17,14 +14,13 @@ import {
   newResource,
   resources,
   departments,
-  stats,
+  conflicts,
 } from './data'
 
 // Import methods and computed properties
 import {
   currentWeekStart,
   currentWeekEnd,
-  conflicts,
   weekDays,
   formatDateRange,
   formatDayDate,
@@ -45,48 +41,18 @@ import {
 
 <template>
   <div class="p-6">
-    <!-- Header with Stats -->
+    <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold">Resource Planning</h1>
         <p class="text-gray-600">{{ resources.length }} team members across {{ departments.length }} departments</p>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
         <select v-model="selectedView" 
                 class="px-4 py-2 bg-white border rounded-lg">
           <option value="calendar">Calendar View</option>
           <option value="timeline">Timeline View</option>
-          <option value="grid">Grid View</option>
         </select>
-        <button @click="showAddResourceModal = true"
-                class="inline-flex items-center px-4 py-2 text-white rounded-lg bg-primary hover:bg-primary/90">
-          <UserPlusIcon class="w-4 h-4 mr-2" />
-          Add Resource
-        </button>
-      </div>
-    </div>
-
-    <!-- Stats Overview -->
-    <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2 lg:grid-cols-4">
-      <div v-for="stat in stats" :key="stat.title"
-           class="p-4 bg-white rounded-lg shadow-sm">
-        <div class="flex justify-between">
-          <div>
-            <p class="text-sm text-gray-600">{{ stat.title }}</p>
-            <p class="mt-1 text-2xl font-semibold">{{ stat.value }}</p>
-          </div>
-          <div :class="`p-3 rounded-full ${stat.bgColor}`">
-            <component :is="stat.icon" 
-                      class="w-5 h-5" 
-                      :class="stat.iconColor" />
-          </div>
-        </div>
-        <div class="flex items-center mt-2 text-sm" 
-             :class="stat.trend >= 0 ? 'text-green-600' : 'text-red-600'">
-          <component :is="stat.trend >= 0 ? TrendingUpIcon : TrendingDownIcon" 
-                    class="w-4 h-4 mr-1" />
-          {{ Math.abs(stat.trend) }}% from last month
-        </div>
       </div>
     </div>
 
@@ -100,11 +66,11 @@ import {
             <div class="flex items-center gap-4">
               <div class="flex items-center gap-2 text-sm">
                 <span class="w-3 h-3 bg-blue-200 rounded-full"></span>
-                <span>Development</span>
-                <span class="w-3 h-3 bg-green-200 rounded-full"></span>
-                <span>Design</span>
+                <span>Project Work</span>
                 <span class="w-3 h-3 bg-purple-200 rounded-full"></span>
-                <span>Meeting</span>
+                <span>Meetings</span>
+                <span class="w-3 h-3 bg-red-200 rounded-full"></span>
+                <span>Time Off</span>
               </div>
             </div>
             <div class="flex items-center gap-2">
@@ -138,7 +104,7 @@ import {
               </div>
 
               <!-- Calendar Body -->
-              <div class="divide-y">
+              <div class="divide-y overflow-y-auto h-[55vh]">
                 <div v-for="resource in resources" 
                      :key="resource.id" 
                      class="grid grid-cols-8">
@@ -163,7 +129,6 @@ import {
                        @dragover.prevent
                        @drop="handleDrop($event, resource.id, day.date)">
                     
-                    <!-- Assignments -->
                     <div v-for="assignment in getAssignments(resource.id, day.date)"
                          :key="assignment.id"
                          class="p-2 mb-1 text-sm rounded cursor-move"
@@ -175,7 +140,6 @@ import {
                       <div class="text-xs">{{ assignment.hours }}h</div>
                     </div>
 
-                    <!-- Add Assignment Button -->
                     <button @click="openAddAssignment(resource.id, day.date)"
                             class="absolute p-1 text-gray-400 bottom-1 right-1 hover:text-gray-600">
                       <PlusIcon class="w-4 h-4" />
@@ -192,7 +156,7 @@ import {
       <div class="space-y-6">
         <!-- Resource Utilization -->
         <div class="p-4 bg-white rounded-lg shadow-sm">
-          <h2 class="mb-4 font-semibold">Resource Utilization</h2>
+          <h2 class="mb-4 font-semibold">Department Allocation</h2>
           <div class="space-y-4">
             <div v-for="dept in departments" :key="dept.id"
                  class="p-3 border rounded-lg">
@@ -208,27 +172,13 @@ import {
                      :style="{ width: `${dept.utilization}%` }">
                 </div>
               </div>
-              <div class="grid grid-cols-2 gap-2 mt-2 text-sm">
-                <div>
-                  <span class="text-gray-500">Capacity:</span>
-                  <span class="ml-1 font-medium">
-                    {{ dept.capacity }}h
-                  </span>
-                </div>
-                <div>
-                  <span class="text-gray-500">Allocated:</span>
-                  <span class="ml-1 font-medium">
-                    {{ dept.allocated }}h
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
 
         <!-- Resource Conflicts -->
         <div class="p-4 bg-white rounded-lg shadow-sm">
-          <h2 class="mb-4 font-semibold">Resource Conflicts</h2>
+          <h2 class="mb-4 font-semibold">Scheduling Conflicts</h2>
           <div class="space-y-2">
             <div v-for="conflict in conflicts" :key="conflict.id"
                  class="p-3 border border-red-200 rounded-lg bg-red-50">
@@ -245,66 +195,5 @@ import {
         </div>
       </div>
     </div>
-
-    <!-- Add Resource Modal -->
-    <Dialog :open="showAddResourceModal" 
-            @close="showAddResourceModal = false"
-            class="fixed inset-0 z-50 flex items-center justify-center">
-      <div class="fixed inset-0 bg-black/50"></div>
-      <div class="relative w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
-        <h2 class="mb-4 text-lg font-bold">Add New Resource</h2>
-        <form @submit.prevent="handleAddResource" class="space-y-4">
-          <div>
-            <label class="block mb-1 text-sm font-medium">Name</label>
-            <input v-model="newResource.name" 
-                   type="text" 
-                   required
-                   class="w-full px-3 py-2 border rounded-md" />
-          </div>
-          <div>
-            <label class="block mb-1 text-sm font-medium">Department</label>
-            <select v-model="newResource.department"
-                    required
-                    class="w-full px-3 py-2 border rounded-md">
-              <option value="">Select Department</option>
-              <option v-for="dept in departments" 
-                      :key="dept.id" 
-                      :value="dept.name">
-                {{ dept.name }}
-              </option>
-            </select>
-          </div>
-          <div>
-            <label class="block mb-1 text-sm font-medium">Skills</label>
-            <input v-model="newResource.skills" 
-                   type="text"
-                   placeholder="Comma separated skills" 
-                   class="w-full px-3 py-2 border rounded-md" />
-          </div>
-          <div class="flex justify-end gap-2">
-            <button type="button"
-                    @click="showAddResourceModal = false"
-                    class="px-4 py-2 border rounded-md">
-              Cancel
-            </button>
-            <button type="submit"
-                    class="px-4 py-2 text-white rounded-md bg-primary">
-              Add Resource
-            </button>
-          </div>
-        </form>
-      </div>
-    </Dialog>
   </div>
 </template>
-
-<style scoped>
-.risk-card {
-  transition: all 0.3s ease;
-}
-
-.risk-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-}
-</style>

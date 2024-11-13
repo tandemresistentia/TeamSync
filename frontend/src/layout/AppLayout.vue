@@ -14,7 +14,7 @@
                 <span class="text-xl font-bold text-primary">TeamSync</span>
               </router-link>
             </div>
-            <div class="hidden md:block">
+            <div v-if="isAuthenticated" class="hidden md:block">
               <div class="flex items-center gap-1">
                 <router-link 
                   v-for="item in navigationItems" 
@@ -58,7 +58,8 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import Login from './Login.vue';
+import Login from './Login/Login.vue';
+import { useAuth } from './Login/useAuth';
 import { 
   LayoutDashboardIcon, 
   UsersIcon, 
@@ -71,6 +72,7 @@ import {
 } from 'lucide-vue-next'
 
 const route = useRoute()
+const { isAuthenticated } = useAuth()
 
 const navigationItems = [
   { 

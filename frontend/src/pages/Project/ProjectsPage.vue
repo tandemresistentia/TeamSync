@@ -12,9 +12,7 @@ import {
   projectRisks,
   projects,
   timelineChartOptions,
-  timelineChartSeries,
-  resourceChartOptions,
-  resourceChartSeries
+  timelineChartSeries
 } from './data'
 
 // Import methods
@@ -131,38 +129,24 @@ import {
       </div>
     </div>
 
-    <!-- Risk Assessment and Resource Allocation -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <!-- Risk Assessment Matrix -->
-      <div class="p-4 bg-white rounded-lg shadow-sm">
-        <h2 class="mb-4 text-lg font-semibold">Risk Assessment</h2>
-        <div class="grid grid-cols-3 gap-4">
-          <div v-for="risk in projectRisks" :key="risk.id"
-               class="p-3 border rounded-lg risk-card"
-               :class="getRiskClass(risk.level)">
-            <div class="flex items-center justify-between mb-2">
-              <span class="font-medium">{{ risk.name }}</span>
-              <span :class="getRiskBadgeClass(risk.level)">
-                {{ risk.level }}
-              </span>
-            </div>
-            <p class="text-sm text-gray-600">{{ risk.description }}</p>
-            <div class="mt-2 text-sm">
-              <span class="font-medium">Impact:</span> {{ risk.impact }}
-            </div>
+    <!-- Risk Assessment -->
+    <div class="p-4 bg-white rounded-lg shadow-sm">
+      <h2 class="mb-4 text-lg font-semibold">Risk Assessment</h2>
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div v-for="risk in projectRisks" :key="risk.id"
+             class="p-3 border rounded-lg risk-card"
+             :class="getRiskClass(risk.level)">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-medium">{{ risk.name }}</span>
+            <span :class="getRiskBadgeClass(risk.level)">
+              {{ risk.level }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-600">{{ risk.description }}</p>
+          <div class="mt-2 text-sm">
+            <span class="font-medium">Impact:</span> {{ risk.impact }}
           </div>
         </div>
-      </div>
-
-      <!-- Resource Allocation -->
-      <div class="p-4 bg-white rounded-lg shadow-sm">
-        <h2 class="mb-4 text-lg font-semibold">Resource Allocation</h2>
-        <VueApexCharts
-          type="heatmap"
-          height="300"
-          :options="resourceChartOptions"
-          :series="resourceChartSeries"
-        />
       </div>
     </div>
   </div>

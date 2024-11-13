@@ -39,14 +39,6 @@ export const teamMetrics = [
     iconColor: 'text-blue-600'
   },
   {
-    title: 'Active Projects',
-    value: '12',
-    subtext: '4 starting soon',
-    icon: BriefcaseIcon,
-    bgColor: 'bg-green-100',
-    iconColor: 'text-green-600'
-  },
-  {
     title: 'Skill Coverage',
     value: '85%',
     subtext: 'Across all projects',

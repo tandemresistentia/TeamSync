@@ -7,40 +7,34 @@ import {
   DocumentIcon,
 } from '@heroicons/vue/24/outline'
 
-// Import all data
+// Import all data - modified to only keep dashboard-specific data
 import { 
   alerts, 
-  teamMembers, 
-  projects, 
   stats, 
-  chartOptions 
+  chartOptions,
+  criticalTasks, // New: Only critical/pending tasks
+  projectAlerts  // New: Only projects needing attention
 } from './data'
 
-// Import all methods
+// Import methods
 import {
-  getStatusColor,
-  getProgressColor,
   getAlertClass,
   getAlertIcon,
   dismissAlert,
-  teamFilter,
   openNewTaskModal,
   openNewProjectModal,
   generateReport
 } from './script'
 
-// Destructure chart options for easier use in template
 const { 
   productivityChartOptions, 
-  productivityChartSeries, 
-  resourceChartOptions, 
-  resourceChartSeries 
+  productivityChartSeries
 } = chartOptions
 </script>
 
 <template>
   <div class="p-6">
-    <!-- Notifications Bar -->
+    <!-- Notifications Bar - Keep this as it shows critical alerts -->
     <div class="mb-6 space-y-2">
       <div v-for="alert in alerts" :key="alert.id" 
            class="flex items-center justify-between p-4 rounded-lg"
@@ -55,7 +49,7 @@ const {
       </div>
     </div>
 
-    <!-- Quick Actions -->
+    <!-- Quick Actions - Keep this for easy access -->
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">Dashboard</h1>
       <div class="flex gap-3">
@@ -74,7 +68,7 @@ const {
       </div>
     </div>
 
-    <!-- Stats Overview -->
+    <!-- High-level KPIs - Simplified stats -->
     <div class="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-4">
       <div v-for="stat in stats" :key="stat.title" 
            class="p-4 bg-white rounded-lg shadow-sm">
@@ -96,11 +90,11 @@ const {
       </div>
     </div>
 
-    <!-- Charts Grid -->
+    <!-- Weekly Overview -->
     <div class="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-2">
-      <!-- Team Productivity Chart -->
+      <!-- Team Performance Trend -->
       <div class="p-6 bg-white rounded-lg shadow-sm">
-        <h2 class="mb-4 text-lg font-semibold">Team Productivity</h2>
+        <h2 class="mb-4 text-lg font-semibold">Weekly Performance Trend</h2>
         <VueApexCharts
           type="line"
           height="300"
@@ -109,70 +103,38 @@ const {
         />
       </div>
 
-      <!-- Resource Utilization Chart -->
+      <!-- Critical Tasks & Deadlines -->
       <div class="p-6 bg-white rounded-lg shadow-sm">
-        <h2 class="mb-4 text-lg font-semibold">Resource Utilization</h2>
-        <VueApexCharts
-          type="bar"
-          height="300"
-          :options="resourceChartOptions"
-          :series="resourceChartSeries"
-        />
+        <h2 class="mb-4 text-lg font-semibold">Critical Tasks & Deadlines</h2>
+        <div class="space-y-4">
+          <div v-for="task in criticalTasks" :key="task.id" 
+               class="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+            <div class="flex items-center">
+              <span class="px-2 py-1 text-xs rounded" 
+                    :class="task.priority === 'high' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'">
+                {{ task.priority }}
+              </span>
+              <span class="ml-3">{{ task.name }}</span>
+            </div>
+            <span class="text-sm text-gray-600">Due: {{ task.dueDate }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Team and Projects Grid -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <!-- Team Availability -->
-      <div class="p-6 bg-white rounded-lg shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold">Team Availability</h2>
-          <select v-model="teamFilter" class="px-3 py-1 border rounded">
-            <option value="all">All Teams</option>
-            <option value="development">Development</option>
-            <option value="design">Design</option>
-          </select>
-        </div>
-        <div class="space-y-4">
-          <div v-for="member in teamMembers" :key="member.id" 
-               class="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-            <div class="flex items-center">
-              <div class="w-2 h-2 rounded-full" 
-                   :class="member.status === 'available' ? 'bg-green-500' : 'bg-red-500'">
-              </div>
-              <span class="ml-3">{{ member.name }}</span>
-            </div>
-            <div class="flex items-center">
-              <div class="w-24 h-2 mr-3 bg-gray-200 rounded-full">
-                <div class="h-2 bg-blue-600 rounded-full" 
-                     :style="{ width: member.availability + '%' }" />
-              </div>
-              <span class="text-sm text-gray-600">{{ member.availability }}%</span>
-            </div>
+    <!-- Projects Needing Attention -->
+    <div class="p-6 bg-white rounded-lg shadow-sm">
+      <h2 class="mb-4 text-lg font-semibold">Projects Needing Attention</h2>
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div v-for="project in projectAlerts" :key="project.id" 
+             class="p-4 border rounded-lg">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-medium">{{ project.name }}</span>
+            <span class="px-2 py-1 text-xs text-red-800 bg-red-100 rounded">
+              {{ project.issue }}
+            </span>
           </div>
-        </div>
-      </div>
-
-      <!-- Active Projects -->
-      <div class="p-6 bg-white rounded-lg shadow-sm">
-        <h2 class="mb-4 text-lg font-semibold">Active Projects</h2>
-        <div class="space-y-4">
-          <div v-for="project in projects" :key="project.id" 
-               class="p-4 border rounded-lg">
-            <div class="flex items-center justify-between mb-2">
-              <span class="font-medium">{{ project.name }}</span>
-              <span :class="getStatusColor(project.status)">{{ project.status }}</span>
-            </div>
-            <div class="w-full h-2 mb-2 bg-gray-200 rounded-full">
-              <div class="h-2 rounded-full" 
-                   :class="getProgressColor(project.progress)"
-                   :style="{ width: project.progress + '%' }" />
-            </div>
-            <div class="flex justify-between text-sm text-gray-500">
-              <span>Progress: {{ project.progress }}%</span>
-              <span>Due: {{ project.dueDate }}</span>
-            </div>
-          </div>
+          <p class="text-sm text-gray-600">{{ project.description }}</p>
         </div>
       </div>
     </div>
