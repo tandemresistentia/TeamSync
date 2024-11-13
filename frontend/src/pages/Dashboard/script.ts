@@ -14,7 +14,11 @@ import {
   BellIcon
 } from '@heroicons/vue/24/outline'
 
-import { alerts, teamMembers, projects, stats, chartOptions } from './data'
+import { useDashboard } from './data'
+// Import all data
+const {
+  alerts,
+} = useDashboard()
 
 // Methods
 const getStatusColor = (status: string) => ({

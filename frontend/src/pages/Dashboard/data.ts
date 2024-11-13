@@ -1,4 +1,6 @@
-﻿import { ref } from 'vue'
+﻿// data.ts
+import axios from 'axios'
+import { ref } from 'vue'
 import {
   UsersIcon,
   ClockIcon,
@@ -8,204 +10,156 @@ import {
   ArrowTrendingDownIcon,
   BellIcon
 } from '@heroicons/vue/24/outline'
-export const alerts = ref([
-  { id: 1, type: 'warning', message: '3 team members are approaching capacity' },
-  { id: 2, type: 'info', message: 'New project resources available' },
-  { id: 3, type: 'error', message: 'Server capacity reaching critical levels' }
-])
 
-export const teamMembers = ref([
-  { id: 1, name: 'John Doe', status: 'available', availability: 85 },
-  { id: 2, name: 'Jane Smith', status: 'busy', availability: 25 },
-  { id: 3, name: 'Mike Johnson', status: 'available', availability: 60 },
-  { id: 4, name: 'Sarah Williams', status: 'busy', availability: 30 }
-])
-
-export const projects = ref([
-  { 
-    id: 1, 
-    name: 'Website Redesign', 
-    status: 'On Track', 
-    progress: 75,
-    dueDate: '2024-12-01'
-  },
-  { 
-    id: 2, 
-    name: 'Mobile App', 
-    status: 'At Risk', 
-    progress: 45,
-    dueDate: '2024-11-15'
-  },
-  { 
-    id: 3, 
-    name: 'Database Migration', 
-    status: 'Delayed', 
-    progress: 30,
-    dueDate: '2024-10-30'
+const api = axios.create({
+  baseURL: 'http://localhost:8080/api/dashboard',
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem('token')}`
   }
-])
+})
 
-export const stats = [
-  {
-    title: 'Team Availability',
-    value: '85%',
-    icon: UsersIcon,
-    bgColor: 'bg-blue-100',
-    iconColor: 'text-blue-600',
-    trend: '+5% vs last week',
-    trendIcon: ArrowTrendingUpIcon,
-    trendColor: 'text-green-600'
-  },
-  {
-    title: 'Projects On Track',
-    value: '8/10',
-    icon: CheckCircleIcon,
-    bgColor: 'bg-green-100',
-    iconColor: 'text-green-600',
-    trend: '+2 vs last month',
-    trendIcon: ArrowTrendingUpIcon,
-    trendColor: 'text-green-600'
-  },
-  {
-    title: 'Resource Usage',
-    value: '72%',
-    icon: ClockIcon,
-    bgColor: 'bg-purple-100',
-    iconColor: 'text-purple-600',
-    trend: '-3% vs last week',
-    trendIcon: ArrowTrendingDownIcon,
-    trendColor: 'text-red-600'
-  },
-  {
-    title: 'Pending Tasks',
-    value: '24',
-    icon: BellIcon,
-    bgColor: 'bg-yellow-100',
-    iconColor: 'text-yellow-600',
-    trend: '4 urgent',
-    trendIcon: ExclamationTriangleIcon,
-    trendColor: 'text-yellow-600'
-  }
-]
-
-export const chartOptions = {
-  productivityChartOptions: {
-    chart: {
-      type: 'line',
-      toolbar: { show: false }
-    },
-    stroke: { curve: 'smooth', width: 3 },
-    colors: ['#3B82F6', '#10B981'],
-    grid: { borderColor: '#f3f4f6' },
-    xaxis: {
-      categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
-    },
-    yaxis: [
-      {
-        title: { text: 'Tasks' }
+export function useDashboard() {
+  const alerts = ref([])
+  const criticalTasks = ref([])
+  const stats = ref([])
+  const chartOptions = ref({
+    productivityChartOptions: {
+      chart: {
+        type: 'line',
+        toolbar: { show: false }
       },
-      {
-        opposite: true,
-        title: { text: 'Hours' }
+      stroke: { curve: 'smooth', width: 3 },
+      colors: ['#3B82F6', '#10B981'],
+      grid: { borderColor: '#f3f4f6' },
+      xaxis: {
+        categories: []
+      },
+      yaxis: [
+        {
+          title: { text: 'Tasks' }
+        },
+        {
+          opposite: true,
+          title: { text: 'Hours' }
+        }
+      ]
+    },
+    productivityChartSeries: [],
+    resourceChartOptions: {
+      chart: {
+        type: 'bar',
+        toolbar: { show: false }
+      },
+      plotOptions: {
+        bar: { horizontal: true, borderRadius: 4 }
+      },
+      colors: ['#3B82F6'],
+      grid: { borderColor: '#f3f4f6' },
+      xaxis: {
+        categories: []
       }
-    ]
-  },
-  productivityChartSeries: [
-    {
-      name: 'Tasks Completed',
-      data: [30, 40, 35, 50, 45]
     },
-    {
-      name: 'Hours Worked',
-      data: [45, 52, 49, 56, 50]
-    }
-  ],
-  resourceChartOptions: {
-    chart: {
-      type: 'bar',
-      toolbar: { show: false }
-    },
-    plotOptions: {
-      bar: { horizontal: true, borderRadius: 4 }
-    },
-    colors: ['#3B82F6'],
-    grid: { borderColor: '#f3f4f6' },
-    xaxis: {
-      categories: ['Server', 'Storage', 'Bandwidth', 'CPU', 'Memory']
-    }
-  },
-  resourceChartSeries: [{
-    name: 'Usage',
-    data: [85, 72, 65, 89, 76]
-  }]
-}
-export const criticalTasks = ref([
-  {
-    id: 1,
-    name: 'Database Performance Optimization',
-    priority: 'high',
-    dueDate: 'Today',
-    assignee: 'John Doe',
-    department: 'Development'
-  },
-  {
-    id: 2,
-    name: 'Security Audit Implementation',
-    priority: 'high',
-    dueDate: 'Tomorrow',
-    assignee: 'Sarah Williams',
-    department: 'Security'
-  },
-  {
-    id: 3,
-    name: 'Client Meeting Preparation',
-    priority: 'medium',
-    dueDate: 'Nov 15',
-    assignee: 'Mike Johnson',
-    department: 'Marketing'
-  },
-  {
-    id: 4,
-    name: 'API Documentation Update',
-    priority: 'medium',
-    dueDate: 'Nov 16',
-    assignee: 'Jane Smith',
-    department: 'Development'
-  }
-])
+    resourceChartSeries: []
+  })
 
-// Projects Needing Attention
-export const projectAlerts = ref([
-  {
-    id: 1,
-    name: 'Mobile App',
-    issue: 'Resource Shortage',
-    description: 'Development team at capacity, may affect sprint delivery',
-    status: 'At Risk',
-    impact: 'high'
-  },
-  {
-    id: 2,
-    name: 'Database Migration',
-    issue: 'Timeline Risk',
-    description: 'Current progress 30% behind schedule, needs immediate attention',
-    status: 'Delayed',
-    impact: 'high'
-  },
-  {
-    id: 3,
-    name: 'CRM Integration',
-    issue: 'Budget Warning',
-    description: 'Project expenses approaching budget limit (85% utilized)',
-    status: 'At Risk',
-    impact: 'medium'
-  },
-  {
-    id: 4,
-    name: 'Cloud Infrastructure',
-    issue: 'Technical Debt',
-    description: 'Critical updates pending, affecting system performance',
-    status: 'Warning',
-    impact: 'medium'
+  const fetchDashboardData = async () => {
+    try {
+      const [
+        alertsRes,
+        productivityData,
+        resourceData,
+        criticalTasksData,
+      ] = await Promise.all([
+        api.get('/alerts'),
+        api.get('/productivity-chart'),
+        api.get('/resource-usage'),
+        api.get('/critical-tasks'),
+      ])
+
+      alerts.value = alertsRes.data
+      criticalTasks.value = criticalTasksData.data
+      stats.value = [
+        {
+          title: 'Team Availability',
+          value: '85%',
+          icon: UsersIcon,
+          bgColor: 'bg-blue-100',
+          iconColor: 'text-blue-600',
+          trend: '+5% vs last week',
+          trendIcon: ArrowTrendingUpIcon,
+          trendColor: 'text-green-600'
+        },
+        {
+          title: 'Projects On Track',
+          value: '8/10',
+          icon: CheckCircleIcon,
+          bgColor: 'bg-green-100',
+          iconColor: 'text-green-600',
+          trend: '+2 vs last month',
+          trendIcon: ArrowTrendingUpIcon,
+          trendColor: 'text-green-600'
+        },
+        {
+          title: 'Resource Usage',
+          value: '72%',
+          icon: ClockIcon,
+          bgColor: 'bg-purple-100',
+          iconColor: 'text-purple-600',
+          trend: '-3% vs last week',
+          trendIcon: ArrowTrendingDownIcon,
+          trendColor: 'text-red-600'
+        },
+        {
+          title: 'Pending Tasks',
+          value: '24',
+          icon: BellIcon,
+          bgColor: 'bg-yellow-100',
+          iconColor: 'text-yellow-600',
+          trend: '4 urgent',
+          trendIcon: ExclamationTriangleIcon,
+          trendColor: 'text-yellow-600'
+        }
+      ]
+
+      chartOptions.value = {
+        ...chartOptions.value,
+        productivityChartOptions: {
+          ...chartOptions.value.productivityChartOptions,
+          xaxis: {
+            categories: productivityData.data.categories
+          }
+        },
+        productivityChartSeries: [
+          {
+            name: 'Tasks Completed',
+            data: productivityData.data.tasksCompleted
+          },
+          {
+            name: 'Hours Worked',
+            data: productivityData.data.hoursWorked
+          }
+        ],
+        resourceChartOptions: {
+          ...chartOptions.value.resourceChartOptions,
+          xaxis: {
+            categories: resourceData.data.categories
+          }
+        },
+        resourceChartSeries: [{
+          name: 'Usage',
+          data: resourceData.data.usage
+        }]
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error)
+    }
   }
-])
+
+  return {
+    alerts,
+    stats,
+    criticalTasks,
+    chartOptions,
+    fetchDashboardData
+  }
+}

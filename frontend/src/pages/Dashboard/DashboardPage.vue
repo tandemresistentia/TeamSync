@@ -6,15 +6,25 @@ import {
   FolderPlusIcon,
   DocumentIcon,
 } from '@heroicons/vue/24/outline'
+import { useDashboard } from './data'
+import { onMounted, computed } from 'vue'
 
-// Import all data - modified to only keep dashboard-specific data
-import { 
-  alerts, 
-  stats, 
+// Import all data
+const {
+  alerts,
+  stats,
   chartOptions,
-  criticalTasks, // New: Only critical/pending tasks
-  projectAlerts  // New: Only projects needing attention
-} from './data'
+  criticalTasks,
+  fetchDashboardData
+} = useDashboard()
+
+// Create computed properties for the chart options and series
+const productivityChartOptions = computed(() => chartOptions.value.productivityChartOptions || {})
+const productivityChartSeries = computed(() => chartOptions.value.productivityChartSeries || [])
+
+onMounted(() => {
+  fetchDashboardData()
+})
 
 // Import methods
 import {
@@ -25,16 +35,11 @@ import {
   openNewProjectModal,
   generateReport
 } from './script'
-
-const { 
-  productivityChartOptions, 
-  productivityChartSeries
-} = chartOptions
 </script>
 
 <template>
   <div class="p-6">
-    <!-- Notifications Bar - Keep this as it shows critical alerts -->
+    <!-- Notifications Bar -->
     <div class="mb-6 space-y-2">
       <div v-for="alert in alerts" :key="alert.id" 
            class="flex items-center justify-between p-4 rounded-lg"
@@ -49,7 +54,7 @@ const {
       </div>
     </div>
 
-    <!-- Quick Actions - Keep this for easy access -->
+    <!-- Quick Actions -->
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">Dashboard</h1>
       <div class="flex gap-3">
@@ -68,7 +73,7 @@ const {
       </div>
     </div>
 
-    <!-- High-level KPIs - Simplified stats -->
+    <!-- Stats Grid -->
     <div class="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-4">
       <div v-for="stat in stats" :key="stat.title" 
            class="p-4 bg-white rounded-lg shadow-sm">
@@ -96,6 +101,7 @@ const {
       <div class="p-6 bg-white rounded-lg shadow-sm">
         <h2 class="mb-4 text-lg font-semibold">Weekly Performance Trend</h2>
         <VueApexCharts
+          v-if="productivityChartSeries.length > 0"
           type="line"
           height="300"
           :options="productivityChartOptions"
@@ -122,21 +128,5 @@ const {
       </div>
     </div>
 
-    <!-- Projects Needing Attention -->
-    <div class="p-6 bg-white rounded-lg shadow-sm">
-      <h2 class="mb-4 text-lg font-semibold">Projects Needing Attention</h2>
-      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div v-for="project in projectAlerts" :key="project.id" 
-             class="p-4 border rounded-lg">
-          <div class="flex items-center justify-between mb-2">
-            <span class="font-medium">{{ project.name }}</span>
-            <span class="px-2 py-1 text-xs text-red-800 bg-red-100 rounded">
-              {{ project.issue }}
-            </span>
-          </div>
-          <p class="text-sm text-gray-600">{{ project.description }}</p>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
