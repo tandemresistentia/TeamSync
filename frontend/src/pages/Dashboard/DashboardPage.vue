@@ -38,7 +38,7 @@ import {
 </script>
 
 <template>
-  <div class="p-6">
+  <div class="h-screen p-6">
     <!-- Notifications Bar -->
     <div class="mb-6 space-y-2">
       <div v-for="alert in alerts" :key="alert.id" 

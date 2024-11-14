@@ -1,4 +1,4 @@
-package com.example.backend.Dashboard.model;
+package com.example.backend.pages.Dashboard.model;
 
 import lombok.Data;
 import jakarta.persistence.Entity;

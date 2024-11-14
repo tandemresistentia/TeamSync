@@ -1,10 +1,11 @@
-package com.example.backend.Dashboard.controller;
-
-import com.example.backend.Dashboard.model.*;
-import com.example.backend.Dashboard.repository.*;
+package com.example.backend.pages.Dashboard.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import com.example.backend.pages.Dashboard.model.*;
+import com.example.backend.pages.Dashboard.repository.*;
+
 import java.util.*;
 
 @RestController

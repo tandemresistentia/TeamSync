@@ -1,4 +1,5 @@
 ﻿<script setup lang="ts">
+import { onMounted } from 'vue';
 import VueApexCharts from 'vue3-apexcharts'
 import {
   UserPlusIcon,
@@ -7,25 +8,28 @@ import {
   EyeIcon,
 } from '@heroicons/vue/24/outline'
 
-// Import data
-import {
+import { data } from './data';
+const {
+  teamMetrics,
   search,
   departmentFilter,
-  teamMetrics,
-  teamMembers,
   upcomingLeave,
-  skillsChartOptions,
-  skillsChartSeries
-} from './data'
-
+  chartOptions, // Add these
+  fetchTeamsData
+} = data()
 // Import methods and computed properties
 import {
   filteredMembers,
   getAvailabilityClass,
   openAddMemberModal,
   openScheduleModal,
-  openMemberDetails
+  openMemberDetails,
+  isLoading
 } from './script'
+
+onMounted(() => {
+  fetchTeamsData()
+})
 </script>
 
 <template>
@@ -87,11 +91,18 @@ import {
               </div>
             </div>
           </div>
-          <div class="p-4">
-            <div class="space-y-4">
-              <div v-for="member in filteredMembers" 
-                   :key="member.id" 
-                   class="p-4 border rounded-lg hover:bg-gray-50">
+    <div class="p-4 h-[55vh] overflow-auto">
+    <div v-if="isLoading" class="flex items-center justify-center h-64">
+      <div class="w-12 h-12 border-b-2 border-blue-500 rounded-full animate-spin"></div>
+    </div>
+    <div v-else-if="filteredMembers.length === 0" class="py-8 text-center">
+      <p class="text-gray-500">No team members found</p>
+    </div>
+    <div v-else class="space-y-4">
+      <!-- Your existing member cards -->
+      <div v-for="member in filteredMembers" 
+           :key="member.id" 
+           class="p-4 border rounded-lg hover:bg-gray-50">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center">
                     <div class="w-12 h-12 bg-gray-200 rounded-full">
@@ -135,14 +146,14 @@ import {
       <div class="space-y-6">
         <!-- Skills Distribution -->
         <div class="p-4 bg-white rounded-lg shadow-sm">
-          <h2 class="mb-4 text-lg font-semibold">Skills Distribution</h2>
-          <VueApexCharts
-            type="radar"
-            height="300"
-            :options="skillsChartOptions"
-            :series="skillsChartSeries"
-          />
-        </div>
+            <h2 class="mb-4 text-lg font-semibold">Skills Distribution</h2>
+            <VueApexCharts
+              type="radar"
+              height="300"
+              :options="chartOptions.skillsChartOptions"
+              :series="chartOptions.skillsChartSeries"
+            />
+          </div>
 
         <!-- Leave Calendar -->
         <div class="p-4 bg-white rounded-lg shadow-sm">

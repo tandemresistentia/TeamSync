@@ -1,8 +1,29 @@
-﻿import { computed } from 'vue'
-import { search, departmentFilter, teamMembers, TeamMember } from './data'
+﻿// script.ts
+import { computed, ref } from 'vue'
+import { data } from './data'
+import type { TeamMember } from './types'
+
+const { 
+  search,
+  departmentFilter, 
+  teamMembers,
+  fetchTeamsData  // Add this
+} = data()
+
+// Add loading state if needed
+const isLoading = ref(true)
+
+// Fetch data when script is loaded
+fetchTeamsData().then(() => {
+  isLoading.value = false
+})
 
 // Computed Properties
 export const filteredMembers = computed(() => {
+  if (!teamMembers.value || teamMembers.value.length === 0) {
+    return []
+  }
+
   return teamMembers.value.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(search.value.toLowerCase()) ||
                          member.role.toLowerCase().includes(search.value.toLowerCase())
@@ -11,6 +32,7 @@ export const filteredMembers = computed(() => {
     return matchesSearch && matchesDepartment
   })
 })
+
 
 // Methods
 export const getAvailabilityClass = (status: string) => {
@@ -32,4 +54,13 @@ export const openScheduleModal = () => {
 
 export const openMemberDetails = (member: TeamMember) => {
   console.log('Opening member details:', member)
+}
+
+// Export everything needed
+export { 
+  isLoading,
+  teamMembers,
+  search,
+  departmentFilter,
+  fetchTeamsData
 }

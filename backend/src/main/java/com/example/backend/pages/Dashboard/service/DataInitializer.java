@@ -1,10 +1,11 @@
-package com.example.backend.Dashboard.service;
-
-import com.example.backend.Dashboard.model.*;
-import com.example.backend.Dashboard.repository.*;
+package com.example.backend.pages.Dashboard.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.example.backend.pages.Dashboard.model.*;
+import com.example.backend.pages.Dashboard.repository.*;
+
 import jakarta.annotation.PostConstruct;
 import java.util.*;
 
@@ -15,7 +16,6 @@ public class DataInitializer {
     @Autowired
     private CriticalTaskRepository criticalTaskRepository;
 
-    @PostConstruct
     public void init() {
         initializeAlerts();
         initializeCriticalTasks();

@@ -1,11 +1,22 @@
 ﻿import { ref, computed, watch } from 'vue'
-import { format, addDays, startOfWeek, endOfWeek } from 'date-fns'
-import { assignments, resources, departments, newResource,showAddResourceModal } from './data'
-import type { Assignment, Conflict,WeekDay } from './types'
+import { format, addDays, startOfWeek, endOfWeek, parseISO } from 'date-fns'
+import { useResourceData } from './data'
+import type { Assignment, Conflict, WeekDay } from './types'
+
+// Get data from resource store
+const {
+  assignments,
+  resources,
+  departments,
+  newResource,
+  showAddResourceModal,
+  fetchData,
+  api
+} = useResourceData()
 
 // Calendar state
-export const currentWeekStart = ref(startOfWeek(new Date()))
-export const currentWeekEnd = ref(endOfWeek(new Date()))
+export const currentWeekStart = ref(startOfWeek(new Date(), { weekStartsOn: 1 }))
+export const currentWeekEnd = ref(endOfWeek(new Date(), { weekStartsOn: 1 }))
 
 // Computed Properties
 export const weekDays = computed<WeekDay[]>(() => {
@@ -31,8 +42,11 @@ export const conflicts = computed(() => {
       if (totalHours > 8) {
         result.push({
           id: Date.now(),
+          type: 'overallocation',
           message: `${resource.name} is overallocated on ${formatDayDate(day.date)} (${totalHours}h)`,
-          severity: 'high'
+          severity: 'high',
+          resources: [resource.name],
+          date: day.date
         })
       }
     })
@@ -46,11 +60,13 @@ export const formatDateRange = (start: Date, end: Date) => {
 }
 
 export const formatDayDate = (date: string) => {
-  return format(new Date(date), 'MMM d')
+  const parsedDate = parseISO(date)
+  return format(parsedDate, 'MMM d')
 }
 
 export const isWeekend = (date: string) => {
-  const day = new Date(date).getDay()
+  const parsedDate = parseISO(date)
+  const day = parsedDate.getDay()
   return day === 0 || day === 6
 }
 
@@ -64,20 +80,24 @@ export const nextWeek = () => {
   currentWeekEnd.value = addDays(currentWeekEnd.value, 7)
 }
 
+
 export const getAssignments = (resourceId: number, date: string) => {
-  return assignments.value.filter(a => 
-    a.resourceId === resourceId && a.date === date
-  )
+  console.log(assignments.value)
+  return assignments.value;  // Simply return all assignments
 }
 
 export const getAssignmentClass = (assignment: Assignment) => {
   const baseClasses = 'shadow-sm border transition-all hover:shadow-md'
-  const typeClasses = {
+  const typeClasses: Record<string, string> = {
     development: 'bg-blue-50 border-blue-200 text-blue-700',
     design: 'bg-green-50 border-green-200 text-green-700',
-    meeting: 'bg-purple-50 border-purple-200 text-purple-700'
+    meeting: 'bg-purple-50 border-purple-200 text-purple-700',
+    timeoff: 'bg-red-50 border-red-200 text-red-700',
+    marketing: 'bg-yellow-50 border-yellow-200 text-yellow-700'
   }
-  return `${baseClasses} `
+
+  const typeClass = typeClasses[assignment.type.toLowerCase()] || 'bg-gray-50 border-gray-200 text-gray-700';
+  return `${baseClasses} ${typeClass}`;
 }
 
 export const getUtilizationClass = (utilization: number) => {
@@ -92,6 +112,15 @@ export const getUtilizationBarClass = (utilization: number) => {
   return 'bg-green-600'
 }
 
+// Debug watcher for assignments
+watch(assignments, (newVal) => {
+  console.log('Assignments updated:', {
+    count: newVal.length,
+    samples: newVal.slice(0, 3),
+    dates: new Set(newVal.map(a => a.date))
+  });
+}, { immediate: true, deep: true });
+
 // Event Handlers
 export const handleDragStart = (event: DragEvent, assignment: Assignment) => {
   if (event.dataTransfer) {
@@ -100,17 +129,19 @@ export const handleDragStart = (event: DragEvent, assignment: Assignment) => {
   }
 }
 
-export const handleDrop = (event: DragEvent, resourceId: number, date: string) => {
+export const handleDrop = async (event: DragEvent, resourceId: number, date: string) => {
   const data = event.dataTransfer?.getData('application/json')
   if (data) {
-    const assignment = JSON.parse(data) as Assignment
-    const index = assignments.value.findIndex(a => a.id === assignment.id)
-    if (index !== -1) {
-      assignments.value[index] = {
+    try {
+      const assignment = JSON.parse(data) as Assignment
+      await api.put(`/assignments/${assignment.id}`, {
         ...assignment,
         resourceId,
         date
-      }
+      })
+      await fetchData()
+    } catch (error) {
+      console.error('Failed to update assignment:', error)
     }
   }
 }
@@ -119,46 +150,55 @@ export const openAssignmentDetails = (assignment: Assignment) => {
   console.log('Opening assignment details:', assignment)
 }
 
-export const openAddAssignment = (resourceId: number, date: string) => {
-  console.log('Opening add assignment modal:', { resourceId, date })
-}
-
-export const handleAddResource = () => {
-  const resource = {
-    id: resources.value.length + 1,
-    name: newResource.value.name,
-    initials: newResource.value.name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase(),
-    department: newResource.value.department,
-    skills: newResource.value.skills.split(',').map(s => s.trim())
-  }
-  
-  resources.value.push(resource)
-  showAddResourceModal.value = false
-  newResource.value = {
-    name: '',
-    department: '',
-    skills: ''
-  }
-}
-
-// Watchers
-watch([assignments, resources], () => {
-  departments.value = departments.value.map(dept => {
-    const deptResources = resources.value.filter(r => r.department === dept.name)
-    const totalAllocated = deptResources.reduce((total, resource) => {
-      return total + assignments.value
-        .filter(a => a.resourceId === resource.id)
-        .reduce((sum, a) => sum + a.hours, 0)
-    }, 0)
-    
-    return {
-      ...dept,
-      allocated: totalAllocated,
-      utilization: Math.round((totalAllocated / dept.capacity) * 100)
+export const openAddAssignment = async (resourceId: number, date: string) => {
+  try {
+    const newAssignment = {
+      resourceId,
+      date,
+      project: 'New Project',
+      hours: 4,
+      type: 'development'
     }
-  })
-})
+    await api.post('/assignments', newAssignment)
+    await fetchData()
+  } catch (error) {
+    console.error('Failed to create assignment:', error)
+  }
+}
+
+export const handleAddResource = async () => {
+  try {
+    const resource = {
+      name: newResource.value.name,
+      initials: newResource.value.name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase(),
+      department: newResource.value.department,
+      skills: newResource.value.skills.split(',').map(s => s.trim())
+    }
+    
+    await api.post('/resources', resource)
+    await fetchData()
+    
+    showAddResourceModal.value = false
+    newResource.value = {
+      name: '',
+      department: '',
+      skills: ''
+    }
+  } catch (error) {
+    console.error('Failed to create resource:', error)
+  }
+}
+
+// Export everything needed by the component
+export {
+  assignments,
+  resources,
+  departments,
+  newResource,
+  showAddResourceModal,
+  fetchData
+}

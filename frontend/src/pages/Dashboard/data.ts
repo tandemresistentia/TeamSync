@@ -14,7 +14,7 @@ import {
 const api = axios.create({
   baseURL: 'http://localhost:8080/api/dashboard',
   headers: {
-    'Authorization': `Bearer ${localStorage.getItem('token')}`
+    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
   }
 })
 

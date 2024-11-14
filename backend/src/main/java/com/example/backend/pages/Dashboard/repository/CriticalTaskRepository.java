@@ -1,9 +1,9 @@
-package com.example.backend.Dashboard.repository;
+package com.example.backend.pages.Dashboard.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.example.backend.Dashboard.model.CriticalTask;
+import com.example.backend.pages.Dashboard.model.CriticalTask;
 
 import java.util.List;
 

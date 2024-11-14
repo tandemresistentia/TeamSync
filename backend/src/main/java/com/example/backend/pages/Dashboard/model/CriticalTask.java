@@ -1,4 +1,4 @@
-package com.example.backend.Dashboard.model;
+package com.example.backend.pages.Dashboard.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

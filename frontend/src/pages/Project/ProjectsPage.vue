@@ -1,9 +1,11 @@
 ﻿<script setup lang="ts">
 import VueApexCharts from 'vue3-apexcharts'
 import { PlusIcon } from 'lucide-vue-next'
+import { useProjectData } from './data'
+import { computed } from 'vue'
 
-// Import data
-import {
+// Get data and methods from our composable
+const {
   timeRange,
   selectedProject,
   activeProjects,
@@ -12,22 +14,70 @@ import {
   projectRisks,
   projects,
   timelineChartOptions,
-  timelineChartSeries
-} from './data'
+  timelineChartSeries,
+} = useProjectData()
 
-// Import methods
-import {
-  formatNumber,
-  getBudgetStatusColor,
-  getBudgetProgressColor,
-  getRiskClass,
-  getRiskBadgeClass,
-  filteredProjects
-} from './script'
+// Utility functions
+const formatNumber = (num: number) => {
+  return new Intl.NumberFormat('en-US').format(num)
+}
+
+const getBudgetStatusColor = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'on budget':
+      return 'text-green-600'
+    case 'over budget':
+      return 'text-red-600'
+    case 'under budget':
+      return 'text-blue-600'
+    default:
+      return 'text-gray-600'
+  }
+}
+
+const getBudgetProgressColor = (percentage: number) => {
+  if (percentage > 100) return 'bg-red-600'
+  if (percentage > 90) return 'bg-yellow-600'
+  return 'bg-green-600'
+}
+
+const getRiskClass = (level: string) => {
+  switch (level.toLowerCase()) {
+    case 'high':
+      return 'border-red-200 bg-red-50'
+    case 'medium':
+      return 'border-yellow-200 bg-yellow-50'
+    case 'low':
+      return 'border-green-200 bg-green-50'
+    default:
+      return 'border-gray-200'
+  }
+}
+
+const getRiskBadgeClass = (level: string) => {
+  switch (level.toLowerCase()) {
+    case 'high':
+      return 'px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full'
+    case 'medium':
+      return 'px-2 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-full'
+    case 'low':
+      return 'px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full'
+    default:
+      return 'px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full'
+  }
+}
+
+// Computed values
+const filteredProjects = computed(() => {
+  if (selectedProject.value === 'all') {
+    return projects.value
+  }
+  return projects.value.filter(project => project.id === selectedProject.value)
+})
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
+  <div class="p-4 space-y-4">
     <!-- Project Overview Header -->
     <div class="flex items-center justify-between">
       <div>
@@ -75,30 +125,30 @@ import {
 
     <!-- Timeline and Budget Section -->
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <!-- Project Timeline -->
-      <div class="p-4 bg-white rounded-lg shadow-sm lg:col-span-2">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold">Project Timeline</h2>
-          <select v-model="selectedProject" class="px-3 py-1 border rounded">
-            <option value="all">All Projects</option>
-            <option v-for="project in projects" :key="project.id" :value="project.id">
-              {{ project.name }}
-            </option>
-          </select>
-        </div>
-        <VueApexCharts
-          type="rangeBar"
-          height="300"
-          :options="timelineChartOptions"
-          :series="timelineChartSeries"
-        />
-      </div>
+  <!-- Project Timeline -->
+  <div class="p-4 bg-white rounded-lg shadow-sm lg:col-span-2">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold">Project Timeline</h2>
+      <select v-model="selectedProject" class="px-3 py-1 border rounded">
+        <option value="all">All Projects</option>
+        <option v-for="project in projects" :key="project.id" :value="project.id">
+          {{ project.name }}
+        </option>
+      </select>
+    </div>
+    <VueApexCharts
+      type="rangeBar"
+      height="300"
+      :options="timelineChartOptions"
+      :series="timelineChartSeries"
+    />
+  </div>
 
-      <!-- Budget Overview -->
-      <div class="p-4 bg-white rounded-lg shadow-sm">
-        <h2 class="mb-4 text-lg font-semibold">Budget Overview</h2>
-        <div class="space-y-4">
-          <div v-for="project in filteredProjects" :key="project.id" 
+  <!-- Budget Overview -->
+  <div class="p-4 bg-white rounded-lg shadow-sm">
+    <h2 class="mb-4 text-lg font-semibold">Budget Overview</h2>
+    <div class="h-[35vh] space-y-4 overflow-auto">
+      <div v-for="project in filteredProjects" :key="project.id" 
                class="p-3 border rounded-lg">
             <div class="flex items-center justify-between mb-2">
               <span class="font-medium">{{ project.name }}</span>
@@ -118,7 +168,7 @@ import {
             </div>
             <div class="mt-2">
               <div class="w-full h-2 bg-gray-200 rounded-full">
-                <div class="h-2 rounded-full"
+                <div class="h-2 overflow-auto rounded-full max-w-[100%]"
                      :class="getBudgetProgressColor(project.spent / project.budget * 100)"
                      :style="{ width: `${(project.spent / project.budget * 100)}%` }">
                 </div>
@@ -130,7 +180,7 @@ import {
     </div>
 
     <!-- Risk Assessment -->
-    <div class="p-4 bg-white rounded-lg shadow-sm">
+    <div class="p-1 bg-white rounded-lg shadow-sm h-[18vh] overflow-auto">
       <h2 class="mb-4 text-lg font-semibold">Risk Assessment</h2>
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <div v-for="risk in projectRisks" :key="risk.id"

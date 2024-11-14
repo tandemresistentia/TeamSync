@@ -1,4 +1,5 @@
 ﻿<script setup lang="ts">
+import { onMounted } from 'vue'
 import { Dialog } from '@headlessui/vue'
 import {
   ChevronLeftIcon,
@@ -7,17 +8,7 @@ import {
   PlusIcon
 } from 'lucide-vue-next'
 
-// Import data
-import {
-  selectedView,
-  showAddResourceModal,
-  newResource,
-  resources,
-  departments,
-  conflicts,
-} from './data'
-
-// Import methods and computed properties
+import { useResourceData } from './data'
 import {
   currentWeekStart,
   currentWeekEnd,
@@ -27,7 +18,6 @@ import {
   isWeekend,
   previousWeek,
   nextWeek,
-  getAssignments,
   getAssignmentClass,
   getUtilizationClass,
   getUtilizationBarClass,
@@ -35,8 +25,29 @@ import {
   handleDrop,
   openAssignmentDetails,
   openAddAssignment,
-  handleAddResource
 } from './script'
+
+const {
+  selectedView,
+  showAddResourceModal,
+  newResource,
+  resources,
+  departments,
+  conflicts,
+  assignments,
+  fetchData,
+  initializeData
+} = useResourceData()
+
+// Initialize data when component mounts
+onMounted(async () => {
+  try {
+    await initializeData() // This will only initialize if data is empty
+    await fetchData()     // This will fetch the latest data
+  } catch (error) {
+    console.error('Failed to initialize/fetch data:', error)
+  }
+})
 </script>
 
 <template>
@@ -123,28 +134,31 @@ import {
 
                   <!-- Time Slots -->
                   <div v-for="day in weekDays" 
-                       :key="`${resource.id}-${day.date}`"
-                       class="relative p-2 border-l min-h-[100px]"
-                       :class="isWeekend(day.date) ? 'bg-gray-50' : ''"
-                       @dragover.prevent
-                       @drop="handleDrop($event, resource.id, day.date)">
-                    
-                    <div v-for="assignment in getAssignments(resource.id, day.date)"
-                         :key="assignment.id"
-                         class="p-2 mb-1 text-sm rounded cursor-move"
-                         :class="getAssignmentClass(assignment)"
-                         draggable="true"
-                         @dragstart="handleDragStart($event, assignment)"
-                         @click="openAssignmentDetails(assignment)">
+                  :key="`${resource.id}-${day.date}`"
+                  class="relative p-2 border-l min-h-[100px]"
+                  :class="isWeekend(day.date) ? 'bg-gray-50' : ''"
+                  @dragover.prevent
+                  @drop="handleDrop($event, resource.id, day.date)">
+
+                  <div v-for="assignment in assignments" :key="assignment.id">
+                    <div
+                      v-if="assignment.resourceId === resource.id && assignment.date === day.date"
+                      class="p-2 mb-1 text-sm rounded cursor-move"
+                      :class="getAssignmentClass(assignment)"
+                      draggable="true"
+                      @dragstart="handleDragStart($event, assignment)"
+                      @click="openAssignmentDetails(assignment)"
+                    >
                       <div class="font-medium">{{ assignment.project }}</div>
                       <div class="text-xs">{{ assignment.hours }}h</div>
                     </div>
-
-                    <button @click="openAddAssignment(resource.id, day.date)"
-                            class="absolute p-1 text-gray-400 bottom-1 right-1 hover:text-gray-600">
-                      <PlusIcon class="w-4 h-4" />
-                    </button>
                   </div>
+
+                <button @click="openAddAssignment(resource.id, day.date)"
+                        class="absolute p-1 text-gray-400 bottom-1 right-1 hover:text-gray-600">
+                  <PlusIcon class="w-4 h-4" />
+                </button>
+              </div>
                 </div>
               </div>
             </div>

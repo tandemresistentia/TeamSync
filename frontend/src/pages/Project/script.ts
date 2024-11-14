@@ -1,5 +1,7 @@
 ﻿import { computed } from 'vue'
-import { projects, selectedProject } from './data'
+import { useProjectData } from './data'
+
+const { projects, selectedProject } = useProjectData()
 
 export const formatNumber = (num: number) => {
   return num.toLocaleString('en-US')

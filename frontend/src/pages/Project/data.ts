@@ -1,167 +1,191 @@
-﻿import { ref } from 'vue'
+﻿import { ref, computed, onMounted, watch } from 'vue'
+import axios from 'axios'
 import { TrendingUpIcon, TrendingDownIcon } from 'lucide-vue-next'
-import { Project } from './types'
 
-
-// State
-export const timeRange = ref('month')
-export const selectedProject = ref('all')
-export const activeProjects = ref(8)
-export const showNewProjectDialog = ref(false)
-
-// Mock Data
-export const healthMetrics = [
-  {
-    title: 'On Track Projects',
-    value: '6/8',
-    trend: '+12.5%',
-    progress: 75,
-    trendIcon: TrendingUpIcon,
-    trendColor: 'text-green-600',
-    progressColor: 'bg-green-600'
-  },
-  {
-    title: 'Budget Compliance',
-    value: '85%',
-    trend: '-2.3%',
-    progress: 85,
-    trendIcon: TrendingDownIcon,
-    trendColor: 'text-red-600',
-    progressColor: 'bg-blue-600'
-  },
-  {
-    title: 'Resource Utilization',
-    value: '92%',
-    trend: '+5.2%',
-    progress: 92,
-    trendIcon: TrendingUpIcon,
-    trendColor: 'text-green-600',
-    progressColor: 'bg-purple-600'
-  },
-  {
-    title: 'Risk Level',
-    value: 'Low',
-    trend: 'Stable',
-    progress: 25,
-    trendIcon: TrendingUpIcon,
-    trendColor: 'text-green-600',
-    progressColor: 'bg-yellow-600'
+const api = axios.create({
+  baseURL: 'http://localhost:8080/api',
+  headers: {
+    'Authorization': `Bearer ${sessionStorage.getItem('token')}`
   }
-]
+})
 
-export const projectRisks = [
-  {
-    id: 1,
-    name: 'Technical Debt',
-    level: 'Medium',
-    description: 'Increasing complexity in legacy systems',
-    impact: 'Moderate'
-  },
-  {
-    id: 2,
-    name: 'Resource Shortage',
-    level: 'High',
-    description: 'Critical skill gaps in development team',
-    impact: 'Severe'
-  },
-  {
-    id: 3,
-    name: 'Scope Creep',
-    level: 'Low',
-    description: 'Minor feature additions requested',
-    impact: 'Minor'
-  }
-]
+export function useProjectData() {
+  // State
+  const timeRange = ref('month')
+  const selectedProject = ref('all')
+  const activeProjects = ref(0)
+  const showNewProjectDialog = ref(false)
 
-export const projects = ref<Project[]>([
-  {
-    id: 1,
-    name: 'Website Redesign',
-    budget: 50000,
-    spent: 35000,
-    budgetStatus: 'On Budget',
-    timeline: [new Date('2024-01-01'), new Date('2024-04-30')],
-    risks: [],
-    resources: []
-  },
-  {
-    id: 2,
-    name: 'Mobile App Development',
-    budget: 120000,
-    spent: 95000,
-    budgetStatus: 'Under Budget',
-    timeline: [new Date('2024-02-01'), new Date('2024-06-30')],
-    risks: [],
-    resources: []
-  },
-  {
-    id: 3,
-    name: 'CRM Integration',
-    budget: 80000,
-    spent: 85000,
-    budgetStatus: 'Over Budget',
-    timeline: [new Date('2024-03-01'), new Date('2024-07-31')],
-    risks: [],
-    resources: []
-  }
-])
+  // Data refs with empty initial values
+  const healthMetrics = ref([])
+  const projectRisks = ref([])
+  const projects = ref([])
 
-// Chart configurations
-export const timelineChartOptions = {
-  chart: {
-    type: 'rangeBar',
-    toolbar: { show: false }
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true,
-      barHeight: '80%'
+  // Filtered projects based on selection and time range
+  const filteredProjects = computed(() => {
+    let filtered = projects.value
+
+    // Filter by selected project
+    if (selectedProject.value !== 'all') {
+      filtered = filtered.filter(p => p.id === selectedProject.value)
     }
-  },
-  xaxis: {
-    type: 'datetime'
-  }
-}
 
-export const timelineChartSeries = [
-  {
-    data: [
+    // Filter by time range
+    const now = new Date()
+    const timeRangeFilter = {
+      week: new Date(now.setDate(now.getDate() - 7)),
+      month: new Date(now.setMonth(now.getMonth() - 1)),
+      quarter: new Date(now.setMonth(now.getMonth() - 3))
+    }
+
+    filtered = filtered.filter(project => {
+      const projectStart = new Date(project.timeline[0])
+      return projectStart >= timeRangeFilter[timeRange.value]
+    })
+
+    return filtered
+  })
+
+  const timelineChartOptions = {
+    chart: {
+      height: 350,
+      type: 'rangeBar',
+      toolbar: {
+        show: false
+      }
+    },
+    plotOptions: {
+      bar: {
+        horizontal: true,
+        barHeight: '50%',
+        rangeBarGroupRows: true
+      }
+    },
+    colors: ['#008FFB'],
+    xaxis: {
+      type: 'datetime',
+      labels: {
+        format: 'MMM yyyy'
+      }
+    },
+    tooltip: {
+      custom: function(opts) {
+        const fromDate = new Date(opts.y1).toLocaleDateString()
+        const toDate = new Date(opts.y2).toLocaleDateString()
+        return (
+          '<div class="p-2">' +
+          '<span>' + opts.w.globals.seriesNames[opts.seriesIndex] + ': </span>' +
+          '<span>' + fromDate + ' - ' + toDate + '</span>' +
+          '</div>'
+        )
+      }
+    }
+  }
+
+  // Use computed for the timeline series data to automatically update when projects change
+  const timelineChartSeries = computed(() => [{
+    name: 'Projects',
+    data: projects.value.map(project => ({
+      x: project.name,
+      y: [
+        new Date(project.startDate).getTime(),
+        new Date(project.endDate).getTime()
+      ],
+      fillColor: getBudgetStatusColor(project.budgetStatus)
+    }))
+  }])
+
+  const getBudgetStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'on budget':
+        return '#10B981' // green
+      case 'over budget':
+        return '#EF4444' // red
+      case 'under budget':
+        return '#3B82F6' // blue
+      default:
+        return '#6B7280' // gray
+    }
+  }
+
+  const resourceChartSeries = computed(() => {
+    const projectData = filteredProjects.value
+
+    return [
       {
-        x: 'Project A',
-        y: [new Date('2024-01-01').getTime(), new Date('2024-04-30').getTime()]
+        name: 'Development',
+        data: projectData.map(project => ({
+          x: project.name,
+          y: project.resources?.filter(r => r.type === 'development')?.length * 20 || 0
+        }))
       },
       {
-        x: 'Project B',
-        y: [new Date('2024-02-01').getTime(), new Date('2024-05-31').getTime()]
+        name: 'Design',
+        data: projectData.map(project => ({
+          x: project.name,
+          y: project.resources?.filter(r => r.type === 'design')?.length * 20 || 0
+        }))
       }
     ]
-  }
-]
+  })
 
-export const resourceChartOptions = {
-  chart: {
-    type: 'heatmap',
-    toolbar: { show: false }
-  },
-  dataLabels: { enabled: false },
-  colors: ['#008FFB']
+  // Fetch Functions
+  const fetchData = async () => {
+    try {
+      
+      const [projectsRes, metricsRes, risksRes] = await Promise.all([
+        api.get('/projects'),
+        api.get('/health-metrics'),
+        api.get('/project-risks')
+      ])
+
+      projects.value = projectsRes.data.map((project: any) => ({
+        ...project,
+        timeline: [new Date(project.startDate), new Date(project.endDate)]
+      }))
+
+      healthMetrics.value = metricsRes.data.map((metric: any) => ({
+        ...metric,
+        trendIcon: metric.trend.startsWith('+') ? TrendingUpIcon : TrendingDownIcon,
+        trendColor: metric.trend.startsWith('+') ? 'text-green-600' : 'text-red-600'
+      }))
+
+      projectRisks.value = risksRes.data
+      activeProjects.value = filteredProjects.value.length
+    } catch (error) {
+      console.error('Failed to fetch data:', error)
+    }
+  }
+
+  // Watch for changes in timeRange and selectedProject
+  watch([timeRange, selectedProject], () => {
+    activeProjects.value = filteredProjects.value.length
+  })
+
+  // Initialize data
+  onMounted(() => {
+    fetchData()
+  })
+
+  return {
+    // State
+    timeRange,
+    selectedProject,
+    activeProjects,
+    showNewProjectDialog,
+
+    // Data
+    healthMetrics,
+    projectRisks,
+    projects,
+    filteredProjects,
+
+    // Charts
+    timelineChartOptions,
+    timelineChartSeries,
+    resourceChartSeries,
+
+    // Methods
+    fetchData
+  }
 }
-
-export const resourceChartSeries = [
-  {
-    name: 'Development',
-    data: [
-      { x: 'Project A', y: 80 },
-      { x: 'Project B', y: 40 },
-      { x: 'Project C', y: 60 }
-    ]
-  },
-  {
-    name: 'Design',
-    data: [
-      { x: 'Project A', y: 20 },
-      { x: 'Project B', y: 70 },
-      { x: 'Project C', y: 30 }
-    ]
-  }
-]
