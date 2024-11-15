@@ -8,8 +8,8 @@
           <div class="flex items-center gap-8">
             <div class="flex-shrink-0">
               <router-link to="/" class="flex items-center gap-2">
-                <div class="flex items-center justify-center w-8 h-8 rounded bg-primary/10">
-                  <LayersIcon class="w-5 h-5 text-primary" />
+                <div class="flex items-center justify-center rounded w-7 h-7 bg-primary/10">
+                  <CodesandboxIcon class="w-5 h-5 text-primary" />
                 </div>
                 <span class="text-xl font-bold text-primary">TeamSync</span>
               </router-link>
@@ -65,7 +65,7 @@ import {
   UsersIcon, 
   FolderIcon, 
   CalendarIcon,
-  LayersIcon,
+  CodesandboxIcon,
   BellIcon,
   SearchIcon,
   UserIcon

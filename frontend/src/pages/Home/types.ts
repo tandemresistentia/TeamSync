@@ -11,4 +11,5 @@ export interface Testimonial {
   role: string
   content: string
   company: string
+  rating: number
 }

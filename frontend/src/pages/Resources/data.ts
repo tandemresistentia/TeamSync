@@ -27,52 +27,28 @@ export function useResourceData() {
     try {
       // First, let's check what we're getting from each endpoint
       const resourcesRes = await api.get("/resources");
-      console.log('Resources response:', resourcesRes.data);
       
       const departmentsRes = await api.get("/departments");
-      console.log('Departments response:', departmentsRes.data);
       
-      const assignmentsRes = await api.get("/assignments");
-      console.log('Assignments response:', assignmentsRes.data);
+      const assignmentsRes = await api.get("/assignments");;
       
       const conflictsRes = await api.get("/conflicts");
-      console.log('Conflicts response:', conflictsRes.data);
 
       // Now set the data
       resources.value = resourcesRes.data;
       departments.value = departmentsRes.data;
       assignments.value = assignmentsRes.data || [];
       conflicts.value = conflictsRes.data;
-
-      console.log('After setting data:', {
-        resources: resources.value,
-        departments: departments.value,
-        assignments: assignments.value,
-        conflicts: conflicts.value
-      });
-
     } catch (error) {
       console.error("Failed to fetch resource data:", error);
-      console.log('Error details:', {
-        message: error.message,
-        response: error.response?.data
-      });
     }
   };
 
   const initializeData = async () => {
     try {
-      console.log('Starting initialization');
-      const initResponse = await api.post('/init');
-      console.log('Initialization response:', initResponse.data);
-      
       await fetchData();
     } catch (error) {
       console.error("Failed to initialize resource data:", error);
-      console.log('Init error details:', {
-        message: error.message,
-        response: error.response?.data
-      });
     }
   };
 

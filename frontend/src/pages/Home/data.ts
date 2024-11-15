@@ -171,20 +171,30 @@ export function useHomePageData() {
       name: "Sarah Johnson",
       role: "Project Manager at TechCorp",
       content: "TeamSync transformed how we manage our projects. The real-time updates and resource management features are game-changers.",
-      company: "TechCorp"
+      company: "TechCorp",
+      rating: 4,
     },
     {
       name: "Michael Chen",
       role: "CTO at InnovateLabs",
       content: "The best investment we made for our team management. The analytics and reporting features help us make data-driven decisions.",
-      company: "InnovateLabs"
+      company: "InnovateLabs",
+      rating: 5,
     },
     {
       name: "Emily Rodriguez",
       role: "Operations Director at DigitalFlow",
       content: "Outstanding platform that has streamlined our resource allocation and team coordination. Highly recommended!",
-      company: "DigitalFlow"
-    }
+      company: "DigitalFlow",
+      rating: 5,
+    },
+    {
+      name: "Akiko Tanaka",
+      role: "Chief Marketing Officer at SolarTech",
+      content: "This product has been a game-changer for our marketing team. The analytics and campaign management features are incredibly robust and intuitive. Saved us so much time and boosted our ROI.",
+      company: "SolarTech",
+      rating: 5,
+      }
   ])
 
   return {

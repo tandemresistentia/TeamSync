@@ -82,7 +82,6 @@ export const nextWeek = () => {
 
 
 export const getAssignments = (resourceId: number, date: string) => {
-  console.log(assignments.value)
   return assignments.value;  // Simply return all assignments
 }
 

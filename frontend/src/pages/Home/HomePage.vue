@@ -13,10 +13,10 @@ import {
 import {
   RocketIcon,
   PlayCircleIcon,
-  StarIcon,
   UserIcon,
   CheckIcon,
   XIcon,
+  StarIcon,
   CalendarIcon,
 } from "lucide-vue-next"
 
@@ -25,14 +25,13 @@ const { features, pricingPlans, comparisonFeatures, testimonials } = useHomePage
 
 <style src="./HomePage.css" scoped></style>
 
-
 <template>
   <!-- Hero Section -->
   <section class="relative overflow-hidden min-h-[90vh] flex items-center bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-xl">
     <!-- Animated Shapes -->
     <div class="absolute inset-0">
-      <div class="absolute w-[500px] h-[500px] rounded-full top-[-100px] right-[-100px] bg-blue-500/10 blur-3xl animate-float"></div>
-      <div class="absolute w-[500px] h-[500px] rounded-full bottom-[-100px] left-[-100px] bg-purple-500/10 blur-3xl animate-float" style="animation-delay: -2s"></div>
+      <div class="absolute w-[500px] h-[500px] rounded-full top-[-100px] right-[-100px] bg-blue-400/20 blur-3xl animate-float"></div>
+      <div class="absolute w-[500px] h-[500px] rounded-full bottom-[-100px] left-[-100px] bg-purple-400/20 blur-3xl animate-float" style="animation-delay: -2s"></div>
     </div>
 
     <!-- Grid Pattern Overlay -->
@@ -54,7 +53,7 @@ const { features, pricingPlans, comparisonFeatures, testimonials } = useHomePage
         <!-- Main Heading -->
         <h1 class="mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
           Empower Your Team with
-          <div class="mt-2 text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+          <div class="mt-2 text-transparent bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text">
             TeamSync
           </div>
         </h1>
@@ -67,12 +66,12 @@ const { features, pricingPlans, comparisonFeatures, testimonials } = useHomePage
 
         <!-- CTA Buttons -->
         <div class="flex flex-col justify-center gap-4 sm:flex-row">
-          <button class="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold text-white transition-all rounded-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+          <button class="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold text-white transition-all rounded-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
             <RocketIcon class="w-5 h-5" />
             Start Free Trial
           </button>
-          <button class="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold transition-all bg-white border-2 rounded-full border-blue-100 hover:border-blue-200 hover:bg-blue-50 hover:shadow-lg hover:-translate-y-0.5">
-            <PlayCircleIcon class="w-5 h-5 text-blue-600" />
+          <button class="inline-flex items-center justify-center gap-2 px-8 py-4 font-semibold transition-all bg-white border-2 rounded-full border-blue-100 hover:border-blue-300 hover:bg-blue-50 hover:shadow-lg hover:-translate-y-0.5">
+            <PlayCircleIcon class="w-5 h-5 text-blue-500" />
             Watch Demo
           </button>
         </div>
@@ -93,11 +92,11 @@ const { features, pricingPlans, comparisonFeatures, testimonials } = useHomePage
   </section>
 
   <!-- Features Grid -->
-  <section class="py-24 bg-gradient-to-b from-background to-muted/50">
+  <section class="py-24 bg-gradient-to-b from-white to-blue-50">
     <div class="container px-6 mx-auto">
       <div class="mb-16 text-center">
-        <h2 class="mb-4 text-3xl font-bold text-foreground">Everything you need to manage your team</h2>
-        <p class="max-w-2xl mx-auto text-muted-foreground">
+        <h2 class="mb-4 text-3xl font-bold text-gray-800">Everything you need to manage your team</h2>
+        <p class="max-w-2xl mx-auto text-gray-600">
           Powerful features to help you manage resources, track progress, and achieve your goals.
         </p>
       </div>
@@ -105,25 +104,25 @@ const { features, pricingPlans, comparisonFeatures, testimonials } = useHomePage
       <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
         <div v-for="feature in features" 
              :key="feature.title"
-             class="p-6 transition-all border shadow-sm bg-card group rounded-xl hover:shadow-md hover:border-primary/50 border-border">
-          <div class="p-3 mb-4 rounded-lg bg-primary/10 w-fit">
-            <component :is="feature.icon" class="w-6 h-6 text-primary" />
+             class="p-6 transition-all bg-white border shadow-sm group rounded-xl hover:shadow-md hover:border-blue-400">
+          <div class="p-3 mb-4 bg-blue-100 rounded-lg w-fit">
+            <component :is="feature.icon" class="w-6 h-6 text-blue-500" />
           </div>
-          <h3 class="mb-2 text-xl font-bold transition-colors text-foreground group-hover:text-primary">
+          <h3 class="mb-2 text-xl font-bold text-gray-800 transition-colors group-hover:text-blue-500">
             {{ feature.title }}
           </h3>
-          <p class="text-muted-foreground">{{ feature.description }}</p>
+          <p class="text-gray-600">{{ feature.description }}</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Testimonials Carousel -->
-  <section class="py-24 bg-background">
+  <section class="py-24 bg-white">
     <div class="container px-6 mx-auto">
       <div class="mb-16 text-center">
-        <h2 class="mb-4 text-3xl font-bold text-foreground">Loved by teams worldwide</h2>
-        <p class="max-w-2xl mx-auto text-muted-foreground">
+        <h2 class="mb-4 text-3xl font-bold text-gray-800">Loved by teams worldwide</h2>
+        <p class="max-w-2xl mx-auto text-gray-600">
           See what our customers have to say about their experience with TeamSync.
         </p>
       </div>
@@ -131,25 +130,27 @@ const { features, pricingPlans, comparisonFeatures, testimonials } = useHomePage
       <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
         <Card v-for="testimonial in testimonials" 
               :key="testimonial.name"
-              class="transition-all hover:shadow-lg border-border hover:border-primary/50">
+              class="transition-all border-gray-200 hover:shadow-lg hover:border-blue-400">
           <CardContent class="p-8">
             <div class="flex gap-2 mb-4">
-              <StarIcon v-for="i in 5" :key="i" class="w-5 h-5 text-warning" />
+              <StarIcon v-for="i in testimonial.rating" 
+                        :key="i" 
+                        class="w-5 h-5 text-yellow-500" />
+              <StarIcon v-for="i in 5 - testimonial.rating" 
+                        :key="`empty-${i}`" 
+                        class="w-5 h-5 text-gray-300" />
             </div>
-            <blockquote class="mb-6 text-lg text-foreground">
+            <blockquote class="mb-6 text-lg text-gray-800">
               "{{ testimonial.content }}"
             </blockquote>
             <div class="flex items-center gap-4">
-              <div class="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10">
-                <UserIcon class="w-6 h-6 text-primary" />
+              <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
+                <UserIcon class="w-6 h-6 text-blue-500" />
               </div>
               <div>
-                <p class="font-semibold text-foreground">{{ testimonial.name }}</p>
-                <p class="text-sm text-muted-foreground">{{ testimonial.role }}</p>
+                <p class="font-semibold text-gray-800">{{ testimonial.name }}</p>
+                <p class="text-sm text-gray-600">{{ testimonial.role }}</p>
               </div>
-              <img :src="`/${testimonial.company.toLowerCase()}-logo.svg`" 
-                   :alt="testimonial.company"
-                   class="h-8 ml-auto" />
             </div>
           </CardContent>
         </Card>
@@ -158,11 +159,11 @@ const { features, pricingPlans, comparisonFeatures, testimonials } = useHomePage
   </section>
 
   <!-- Pricing Section -->
-  <section class="py-24 bg-gradient-to-b from-muted/50 to-background">
+  <section class="py-24 bg-gradient-to-b from-blue-50 to-white">
     <div class="container px-6 mx-auto">
       <div class="mb-16 text-center">
-        <h2 class="mb-4 text-3xl font-bold text-foreground">Simple, transparent pricing</h2>
-        <p class="max-w-2xl mx-auto text-muted-foreground">
+        <h2 class="mb-4 text-3xl font-bold text-gray-800">Simple, transparent pricing</h2>
+        <p class="max-w-2xl mx-auto text-gray-600">
           Choose the perfect plan for your team. All plans include a 14-day free trial.
         </p>
       </div>
@@ -171,12 +172,12 @@ const { features, pricingPlans, comparisonFeatures, testimonials } = useHomePage
         <Card v-for="plan in pricingPlans" 
               :key="plan.name"
               :class="[
-                'relative overflow-hidden transition-all hover:shadow-xl border-border',
-                plan.name === 'Professional' ? 'border-primary bg-gradient-to-br from-primary/5 to-background' : ''
+                'relative overflow-hidden transition-all hover:shadow-xl border-gray-200',
+                plan.name === 'Professional' ? 'border-blue-400 bg-gradient-to-br from-blue-50 to-white' : ''
               ]">
           <div v-if="plan.name === 'Professional'"
                class="absolute top-5 right-5">
-            <span class="px-3 py-1 text-xs font-medium rounded-full text-primary bg-primary/10">
+            <span class="px-3 py-1 text-xs font-medium text-blue-500 bg-blue-100 rounded-full">
               Most Popular
             </span>
           </div>
@@ -186,14 +187,14 @@ const { features, pricingPlans, comparisonFeatures, testimonials } = useHomePage
           </CardHeader>
           <CardContent>
             <div class="mb-6">
-              <span class="text-4xl font-bold text-foreground">{{ plan.price }}</span>
-              <span class="text-muted-foreground">/month</span>
+              <span class="text-4xl font-bold text-gray-800">{{ plan.price }}</span>
+              <span class="text-gray-600">/month</span>
             </div>
             <ul class="mb-6 space-y-3">
               <li v-for="feature in plan.features" 
                   :key="feature"
-                  class="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckIcon class="w-4 h-4 text-success" />
+                  class="flex items-center gap-2 text-sm text-gray-600">
+                <CheckIcon class="w-4 h-4 text-green-500" />
                 {{ feature }}
               </li>
             </ul>
@@ -208,16 +209,16 @@ const { features, pricingPlans, comparisonFeatures, testimonials } = useHomePage
       </div>
 
       <!-- Feature Comparison Table -->
-      <div class="p-6 border shadow-sm bg-card rounded-xl border-border">
-        <h3 class="mb-6 text-xl font-bold text-foreground">Compare Plans</h3>
+      <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+        <h3 class="mb-6 text-xl font-bold text-gray-800">Compare Plans</h3>
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead>
-              <tr class="border-b border-border">
-                <th class="py-4 text-left text-foreground">Feature</th>
+              <tr class="border-b border-gray-200">
+                <th class="py-4 text-left text-gray-800">Feature</th>
                 <th v-for="plan in pricingPlans" 
                     :key="plan.name"
-                    class="py-4 text-center text-foreground">
+                    class="py-4 text-center text-gray-800">
                   {{ plan.name }}
                 </th>
               </tr>
@@ -225,15 +226,15 @@ const { features, pricingPlans, comparisonFeatures, testimonials } = useHomePage
             <tbody>
               <tr v-for="feature in comparisonFeatures" 
                   :key="feature.name"
-                  class="border-b border-border">
-                <td class="py-4 text-foreground">{{ feature.name }}</td>
+                  class="border-b border-gray-200">
+                <td class="py-4 text-gray-800">{{ feature.name }}</td>
                 <td v-for="plan in pricingPlans" 
                     :key="plan.name"
                     class="py-4 text-center">
                   <CheckIcon v-if="feature.availability[plan.name.toLowerCase()]"
-                           class="w-5 h-5 mx-auto text-success" />
+                           class="w-5 h-5 mx-auto text-green-500" />
                   <XIcon v-else
-                        class="w-5 h-5 mx-auto text-muted-foreground" />
+                        class="w-5 h-5 mx-auto text-gray-400" />
                 </td>
               </tr>
             </tbody>
